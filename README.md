@@ -26,3 +26,9 @@ After all this project is not supposed to be a quick and dirty solution, I want 
 ## ESP8266 FastLED Webserver
 There is already a similar project existing for ESP8266 which you can find here: https://github.com/jasoncoon/esp8266-fastled-webserver 
 You should check it out. It just doesn't entirely fulfill my needs though.
+
+## PlatformIO
+I do not like the Arduino IDE very much. PlatformIO is great and offers many features. You need to install Microsoft Visual Studio Code and PlatformIO as extension. After that, you should be able to build and run the project.
+
+## Name
+Since my lamp kinda looks like a halo I thought the composition between "Halo" and "Light" would make a good name. And I could not find something else which is named "Haloght" online.
