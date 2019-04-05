@@ -6,22 +6,24 @@
 #include <WebServer.h>
 
 #include "../web/PageWiFiSetupServerRoot.h"
+#include "../web/bootstrap-min-css.h"
 
 class WiFiSetup
 {
-  public:
-    static void setup(const WiFiServer &wifiServer, String ssid, String pwd);
+public:
+  static void setup(String ssid, String pwd);
 
-  private:
-    static void logDebug(String message);
-    static void initializeWiFiConfigurationServer();
+private:
+  static void logDebug(String message);
+  static void runWiFiConfigurationServer();
 
-    static void handleNotFound();
-    static void handleRoot();
-    static void handlePostConfiguration();
-    static void handleGetConfiguration();
+  static void handleNotFound();
+  static void handleRoot();
+  static void handlePostConfiguration();
+  static void handleGetConfiguration();
+  static void handleGetBootstrap();
 
-    static WebServer *server;
+  static WebServer *server;
 };
 
 #endif

@@ -1,6 +1,6 @@
 #include "WiFiSetup.h"
 
-void WiFiSetup::setup(const WiFiServer &wifiServer, String ssid, String pwd)
+void WiFiSetup::setup(String ssid, String pwd)
 {
     if (ssid.length > 0)
     {
@@ -18,17 +18,16 @@ void WiFiSetup::setup(const WiFiServer &wifiServer, String ssid, String pwd)
         if (WiFi.status() != WL_CONNECTED)
         {
             logDebug("Could not connect to configured access point, creating access point!");
-            initializeWiFiConfigurationServer();
+            runWiFiConfigurationServer();
         }
         else
         {
             logDebug("Successfully connected to WiFi!");
-            initializeWiFiConfigurationServer();
         }
     }
     else
     {
-        initializeWiFiConfigurationServer();
+        runWiFiConfigurationServer();
     }
 }
 
@@ -40,7 +39,7 @@ void WiFiSetup::logDebug(String message)
 #endif
 }
 
-void WiFiSetup::initializeWiFiConfigurationServer()
+void WiFiSetup::runWiFiConfigurationServer()
 {
     byte mac[6];
     WiFi.macAddress(mac);
@@ -64,6 +63,13 @@ void WiFiSetup::initializeWiFiConfigurationServer()
     server->on("/", handleRoot);
     server->on("/config", HTTP_GET, handleGetConfiguration);
     server->on("/config", HTTP_POST, handlePostConfiguration);
+    server->on("/bootstrap.min.css", HTTP_GET, handleGetBootstrap);
+
+    while (true)
+    {
+        server->handleClient();
+        delay(1);
+    }
 }
 
 void WiFiSetup::handleNotFound()
@@ -87,4 +93,30 @@ void WiFiSetup::handlePostConfiguration()
 void WiFiSetup::handleGetConfiguration()
 {
     logDebug("WebServer: Current configuration called!");
+}
+
+void WiFiSetup::handleGetBootstrap()
+{
+    int chunkSize = 1500;
+    int currentPosition = 0;
+    int totalSize = sizeof(bootstrapMinCss) / sizeof(byte);
+
+    server->setContentLength(CONTENT_LENGTH_UNKNOWN);
+    server->send(200, "text/css", "");
+    while (currentPosition < totalSize)
+    {
+        int endPosition = currentPosition + (chunkSize - 1) < totalSize ? currentPosition + (chunkSize - 1) : totalSize - 1;
+        int currentChunkSize = endPosition - currentPosition + 1;
+
+        byte *currentChunk = new byte[currentChunkSize];
+        for (int i = 0; i < currentChunkSize; i++)
+        {
+            currentChunk[i] = bootstrapMinCss[currentPosition + i];
+        }
+
+        server->sendContent_P((char *)currentChunk);
+
+        delete currentChunk;
+        currentPosition = endPosition + 1;
+    }
 }
