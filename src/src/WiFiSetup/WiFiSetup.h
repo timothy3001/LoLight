@@ -11,7 +11,7 @@
 class WiFiSetup
 {
 public:
-  static void setup(String ssid, String pwd);
+  static void setup(const String ssid, const String pwd);
 
 private:
   static void logDebug(String message);

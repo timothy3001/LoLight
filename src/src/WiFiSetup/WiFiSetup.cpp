@@ -1,8 +1,8 @@
 #include "WiFiSetup.h"
 
-void WiFiSetup::setup(String ssid, String pwd)
+void WiFiSetup::setup(const String ssid, const String pwd)
 {
-    if (ssid.length > 0)
+    if (ssid.length() > 0)
     {
         // Try to connect to the access points
         WiFi.begin(ssid.c_str(), pwd.c_str());

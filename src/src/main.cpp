@@ -4,7 +4,9 @@
 
 void setup()
 {
-    WiFiSetup::setup("", "");
+    String str = "";
+
+    WiFiSetup::setup(str, str);
 }
 
 void loop()
