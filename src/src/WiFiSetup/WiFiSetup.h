@@ -4,7 +4,9 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
+#include <esp_system.h>
 
+#include "../WebServerExtensions/WebServerExtensions.h"
 #include "../web/PageWiFiSetupServerRoot.h"
 #include "../web/bootstrap-min-css.h"
 
@@ -21,7 +23,6 @@ private:
   static void handleRoot();
   static void handlePostConfiguration();
   static void handleGetConfiguration();
-  static void handleGetBootstrap();
 
   static WebServer *server;
 };

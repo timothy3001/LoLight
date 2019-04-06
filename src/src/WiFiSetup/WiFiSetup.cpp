@@ -43,16 +43,16 @@ void WiFiSetup::runWiFiConfigurationServer()
 {
     logDebug("Starting Access point...");
 
-    byte mac[6];
-    WiFi.macAddress(mac);
+    uint8_t mac[6];
+    esp_read_mac(mac, ESP_MAC_WIFI_STA);
 
-    String macString = "";
-    for (int i = 0; i < 6; i++)
+    String macStringLastPart = "";
+    for (int i = 4; i < 6; i++)
     {
-        macString += String(mac[i], HEX);
+        macStringLastPart += String(mac[i], HEX);
     }
 
-    String apName = String("Haloght-") + macString;
+    String apName = String("Haloght-") + macStringLastPart;
 
     String logMessage = String("Starting access point with name '") + apName + String("'...");
     logDebug(logMessage);
@@ -66,7 +66,7 @@ void WiFiSetup::runWiFiConfigurationServer()
     server->on("/", handleRoot);
     server->on("/config", HTTP_GET, handleGetConfiguration);
     server->on("/config", HTTP_POST, handlePostConfiguration);
-    server->on("/bootstrap.min.css", HTTP_GET, handleGetBootstrap);
+    WebServerExtensions::registerLargeFileEndpoint("/bootstrap.min.css", "text/css", *server, bootstrapMinCss, sizeof(bootstrapMinCss) / sizeof(byte));
 
     server->begin();
 
@@ -98,33 +98,4 @@ void WiFiSetup::handlePostConfiguration()
 void WiFiSetup::handleGetConfiguration()
 {
     logDebug("WebServer: Current configuration called!");
-}
-
-void WiFiSetup::handleGetBootstrap()
-{
-    int chunkSize = 1500;
-    int currentPosition = 0;
-    int totalSize = sizeof(bootstrapMinCss) / sizeof(byte);
-
-    server->setContentLength(CONTENT_LENGTH_UNKNOWN);
-    //server->sendHeader("Content-Encoding", "gzip");
-    server->send(200, "text/css", "");
-    while (currentPosition < totalSize)
-    {
-        int endPosition = currentPosition + (chunkSize - 1) < totalSize ? currentPosition + (chunkSize - 1) : totalSize - 1;
-        int currentChunkSize = endPosition - currentPosition + 1;
-
-        // Serial.println(String("Sending byte ") + String(currentPosition) + " until " + String(endPosition) + String("!"));
-
-        byte *currentChunk = new byte[currentChunkSize];
-        for (int i = 0; i < currentChunkSize; i++)
-        {
-            currentChunk[i] = bootstrapMinCss[currentPosition + i];
-        }
-
-        server->sendContent((char *)currentChunk);
-
-        delete currentChunk;
-        currentPosition = endPosition + 1;
-    }
 }
