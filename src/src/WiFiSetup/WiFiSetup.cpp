@@ -1,5 +1,7 @@
 #include "WiFiSetup.h"
 
+WebServer *WiFiSetup::server = NULL;
+
 void WiFiSetup::setup(const String ssid, const String pwd)
 {
     if (ssid.length() > 0)
@@ -33,14 +35,14 @@ void WiFiSetup::setup(const String ssid, const String pwd)
 
 void WiFiSetup::logDebug(String message)
 {
-#ifdef DEBUG
     Serial.print("WiFiSetup: ");
     Serial.println(message);
-#endif
 }
 
 void WiFiSetup::runWiFiConfigurationServer()
 {
+    logDebug("Starting Access point...");
+
     byte mac[6];
     WiFi.macAddress(mac);
 
@@ -50,20 +52,23 @@ void WiFiSetup::runWiFiConfigurationServer()
         macString += String(mac[i], HEX);
     }
 
-    String apName = String("Haloght-") + String(macString);
+    String apName = String("Haloght-") + macString;
 
-    String logMessage = String("Starting access point with name '") + String(apName) + String("'...");
+    String logMessage = String("Starting access point with name '") + apName + String("'...");
     logDebug(logMessage);
 
     WiFi.softAP(apName.c_str(), "");
     logDebug("Access point created! Creating web server...");
 
     server = new WebServer(80);
+
     server->onNotFound(handleNotFound);
     server->on("/", handleRoot);
     server->on("/config", HTTP_GET, handleGetConfiguration);
     server->on("/config", HTTP_POST, handlePostConfiguration);
     server->on("/bootstrap.min.css", HTTP_GET, handleGetBootstrap);
+
+    server->begin();
 
     while (true)
     {
@@ -102,11 +107,14 @@ void WiFiSetup::handleGetBootstrap()
     int totalSize = sizeof(bootstrapMinCss) / sizeof(byte);
 
     server->setContentLength(CONTENT_LENGTH_UNKNOWN);
+    //server->sendHeader("Content-Encoding", "gzip");
     server->send(200, "text/css", "");
     while (currentPosition < totalSize)
     {
         int endPosition = currentPosition + (chunkSize - 1) < totalSize ? currentPosition + (chunkSize - 1) : totalSize - 1;
         int currentChunkSize = endPosition - currentPosition + 1;
+
+        // Serial.println(String("Sending byte ") + String(currentPosition) + " until " + String(endPosition) + String("!"));
 
         byte *currentChunk = new byte[currentChunkSize];
         for (int i = 0; i < currentChunkSize; i++)
@@ -114,7 +122,7 @@ void WiFiSetup::handleGetBootstrap()
             currentChunk[i] = bootstrapMinCss[currentPosition + i];
         }
 
-        server->sendContent_P((char *)currentChunk);
+        server->sendContent((char *)currentChunk);
 
         delete currentChunk;
         currentPosition = endPosition + 1;

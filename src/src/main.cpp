@@ -4,8 +4,10 @@
 
 void setup()
 {
-    String str = "";
+    Serial.begin(9600);
 
+    String str = "";
+    Serial.println("Start...");
     WiFiSetup::setup(str, str);
 }
 
