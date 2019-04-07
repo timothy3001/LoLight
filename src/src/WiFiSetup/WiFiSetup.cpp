@@ -2,14 +2,32 @@
 
 WebServer *WiFiSetup::server = NULL;
 
-void WiFiSetup::setup(const String ssid, const String pwd)
+bool WiFiSetup::readWifiSettings(String *ssid, String *pwd)
 {
-    if (ssid.length() > 0)
-    {
-        // Try to connect to the access points
-        WiFi.begin(ssid.c_str(), pwd.c_str());
+    Preferences preferences;
 
-        logDebug("Connecting to Wifi...");
+    preferences.begin("Wifi-Setup", true);
+
+    ssid = new String(preferences.getString("ssid", String("")));
+
+    if (ssid->length() == 0)
+        return false;
+
+    pwd = new String(preferences.getString("pwd", String("")));
+
+    return true;
+}
+
+void WiFiSetup::setup()
+{
+    String *ssid = 0;
+    String *pwd = 0;
+
+    if (readWifiSettings(ssid, pwd))
+    {
+        // Try to connect to the access point
+        logDebug(String("Connecting to access point with SSID '") + String(ssid->c_str()) + String("'..."));
+        WiFi.begin(ssid->c_str(), pwd->c_str());
 
         ulong startTimeConnecting = millis();
         while (WiFi.status() != WL_CONNECTED && millis() < startTimeConnecting + 10000)
@@ -19,7 +37,7 @@ void WiFiSetup::setup(const String ssid, const String pwd)
 
         if (WiFi.status() != WL_CONNECTED)
         {
-            logDebug("Could not connect to configured access point, creating access point!");
+            logDebug("Could not connect to configured access point, creating access point...");
             runWiFiConfigurationServer();
         }
         else
@@ -31,6 +49,9 @@ void WiFiSetup::setup(const String ssid, const String pwd)
     {
         runWiFiConfigurationServer();
     }
+
+    delete ssid;
+    delete pwd;
 }
 
 void WiFiSetup::logDebug(String message)

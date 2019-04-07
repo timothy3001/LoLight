@@ -4,6 +4,7 @@
 #include <Arduino.h>
 #include <WiFi.h>
 #include <WebServer.h>
+#include <Preferences.h>
 #include <esp_system.h>
 
 #include "../WebServerExtensions/WebServerExtensions.h"
@@ -13,11 +14,12 @@
 class WiFiSetup
 {
 public:
-  static void setup(const String ssid, const String pwd);
+  static void setup();
 
 private:
   static void logDebug(String message);
   static void runWiFiConfigurationServer();
+  static bool readWifiSettings(String *ssid, String *pwd);
 
   static void handleNotFound();
   static void handleRoot();

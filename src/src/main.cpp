@@ -6,9 +6,8 @@ void setup()
 {
     Serial.begin(9600);
 
-    String str = "";
-    Serial.println("Start...");
-    WiFiSetup::setup(str, str);
+    Serial.println("Starting WiFi setup...");
+    WiFiSetup::setup();
 }
 
 void loop()
