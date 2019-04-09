@@ -6,7 +6,7 @@ bool WiFiSetup::readWifiSettings(String *ssid, String *pwd)
 {
     Preferences preferences;
 
-    preferences.begin("Wifi-Setup", true);
+    preferences.begin("WiFi-Setup", true);
 
     ssid = new String(preferences.getString("ssid", String("")));
 
@@ -14,6 +14,8 @@ bool WiFiSetup::readWifiSettings(String *ssid, String *pwd)
         return false;
 
     pwd = new String(preferences.getString("pwd", String("")));
+
+    preferences.end();
 
     return true;
 }

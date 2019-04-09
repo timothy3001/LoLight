@@ -8,7 +8,7 @@
 #include <esp_system.h>
 
 #include "../WebServerExtensions/WebServerExtensions.h"
-#include "../web/PageWiFiSetupServerRoot.h"
+#include "../web/WiFiSetup/PageWiFiSetupServerRoot.h"
 #include "../web/bootstrap-min-css.h"
 
 class WiFiSetup
