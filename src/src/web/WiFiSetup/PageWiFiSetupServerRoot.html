@@ -2,7 +2,7 @@
 <head>
   <link
     rel="stylesheet"
-    href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
   />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
@@ -15,7 +15,7 @@
     </div>
     <div class="row">
       <div class="col-sm-6">
-        <form class="form-horizontal" action="/config">
+        <form class="form-horizontal" action="/config" method="post">
           <div class="form-group">
             <label class="control-label col-sm-3" for="ssid">SSID</label>
             <div class="col-sm-9">
@@ -23,6 +23,7 @@
                 type="text"
                 class="form-control"
                 id="ssid"
+                name="ssid"
                 placeholder="Enter SSID..."
               />
             </div>
@@ -36,6 +37,7 @@
                 type="password"
                 class="form-control"
                 id="password"
+                name="password"
                 placeholder="Enter password..."
               />
             </div>

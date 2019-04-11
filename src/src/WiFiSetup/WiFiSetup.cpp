@@ -89,7 +89,7 @@ void WiFiSetup::runWiFiConfigurationServer()
     server->on("/", handleRoot);
     server->on("/config", HTTP_GET, handleGetConfiguration);
     server->on("/config", HTTP_POST, handlePostConfiguration);
-    WebServerExtensions::registerLargeFileEndpoint("/bootstrap.min.css", "text/css", *server, bootstrapMinCss, sizeof(bootstrapMinCss) / sizeof(byte));
+    WebServerExtensions::registerLargeFileEndpoint("/bootstrap.min.css", "text/css; charset=utf-8", *server, bootstrapMinCss, sizeof(bootstrapMinCss) / sizeof(byte));
 
     server->begin();
 
@@ -115,7 +115,15 @@ void WiFiSetup::handleRoot()
 void WiFiSetup::handlePostConfiguration()
 {
     logDebug("WebServer: New configuration posted!");
+
+    for (int i = 0; i < server->args(); i++)
+    {
+        logDebug(String("Param '") + server->argName(i) + String("' has value '") + server->arg(i) + String("'"));
+    }
+
     String body = server->arg("plain");
+
+    server->send(200, "text/plain", "Ok");
 }
 
 void WiFiSetup::handleGetConfiguration()

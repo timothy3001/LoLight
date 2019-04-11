@@ -9,23 +9,25 @@ void WebServerExtensions::registerLargeFileEndpoint(String endPointName, String 
         server.setContentLength(CONTENT_LENGTH_UNKNOWN);
 
         server.send(200, contentType, "");
+        Serial.println("\n\n\n");
         while (currentPosition < fileSize)
         {
             int endPosition = currentPosition + (chunkSize - 1) < fileSize ? currentPosition + (chunkSize - 1) : fileSize - 1;
             int currentChunkSize = endPosition - currentPosition + 1;
 
-            byte *currentChunk = new byte[currentChunkSize];
+            byte *currentChunk = new byte[currentChunkSize + 1];
             for (int i = 0; i < currentChunkSize; i++)
             {
                 currentChunk[i] = file[currentPosition + i];
             }
+            currentChunk[currentChunkSize] = 0;
 
             server.sendContent((char *)currentChunk);
 
             delete currentChunk;
             currentPosition = endPosition + 1;
-
-            yield();
         }
+
+        Serial.println("\n");
     });
 }
