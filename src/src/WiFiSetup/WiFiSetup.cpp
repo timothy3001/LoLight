@@ -1,38 +1,54 @@
 #include "WiFiSetup.h"
 
 WebServer *WiFiSetup::server = NULL;
+const char *WiFiSetup::PREFERENCES_WIFI = "WiFi-Setup";
+const char *WiFiSetup::SETTING_SSID = "ssid";
+const char *WiFiSetup::SETTING_PASSWORD = "password";
 
-bool WiFiSetup::readWifiSettings(String *ssid, String *pwd)
+bool WiFiSetup::readWifiSettings(char *&ssid, char *&password)
 {
     Preferences preferences;
 
-    preferences.begin("WiFi-Setup", true);
+    preferences.begin(PREFERENCES_WIFI, true);
 
-    ssid = new String(preferences.getString("ssid", String("")));
+    String ssidString = preferences.getString(SETTING_SSID, String(""));
 
-    if (ssid->length() == 0)
-        return false;
+    bool result = false;
+    if (ssidString.length() != 0)
+    {
+        String passwordString = preferences.getString(SETTING_PASSWORD, String(""));
 
-    pwd = new String(preferences.getString("pwd", String("")));
+        ssid = new char[ssidString.length() + 1];
+        password = new char[passwordString.length() + 1];
+
+        strcpy(ssid, ssidString.c_str());
+        strcpy(password, passwordString.c_str());
+
+        result = true;
+    }
 
     preferences.end();
 
-    return true;
+    return result;
 }
 
 void WiFiSetup::setup()
 {
-    String *ssid = 0;
-    String *pwd = 0;
+    char *ssid = 0;
+    char *password = 0;
 
-    if (readWifiSettings(ssid, pwd))
+    bool result = readWifiSettings(ssid, password);
+
+    if (result)
     {
         // Try to connect to the access point
-        logDebug(String("Connecting to access point with SSID '") + String(ssid->c_str()) + String("'..."));
-        WiFi.begin(ssid->c_str(), pwd->c_str());
+        logDebug(String("Connecting to access point with SSID '") + String(ssid) + String("' and password '") + String(password) + String("'..."));
 
-        ulong startTimeConnecting = millis();
-        while (WiFi.status() != WL_CONNECTED && millis() < startTimeConnecting + 10000)
+        WiFi.mode(WIFI_AP);
+        WiFi.begin(ssid, password);
+
+        unsigned long startTimeConnecting = millis();
+        while (WiFi.status() != WL_CONNECTED && millis() < startTimeConnecting + 30000)
         {
             delay(200);
         }
@@ -53,7 +69,7 @@ void WiFiSetup::setup()
     }
 
     delete ssid;
-    delete pwd;
+    delete password;
 }
 
 void WiFiSetup::logDebug(String message)
@@ -80,6 +96,7 @@ void WiFiSetup::runWiFiConfigurationServer()
     String logMessage = String("Starting access point with name '") + apName + String("'...");
     logDebug(logMessage);
 
+    WiFi.mode(WIFI_AP_STA);
     WiFi.softAP(apName.c_str(), "");
     logDebug("Access point created! Creating web server...");
 
@@ -87,7 +104,6 @@ void WiFiSetup::runWiFiConfigurationServer()
 
     server->onNotFound(handleNotFound);
     server->on("/", handleRoot);
-    server->on("/config", HTTP_GET, handleGetConfiguration);
     server->on("/config", HTTP_POST, handlePostConfiguration);
     WebServerExtensions::registerLargeFileEndpoint("/bootstrap.min.css", "text/css; charset=utf-8", *server, bootstrapMinCss, sizeof(bootstrapMinCss) / sizeof(byte));
 
@@ -121,12 +137,25 @@ void WiFiSetup::handlePostConfiguration()
         logDebug(String("Param '") + server->argName(i) + String("' has value '") + server->arg(i) + String("'"));
     }
 
-    String body = server->arg("plain");
+    String ssid = server->arg("ssid");
+    String password = server->arg("password");
 
-    server->send(200, "text/plain", "Ok");
-}
+    if (ssid.length() == 0)
+    {
+        server->send(400, "text/html", pageWiFiSetupServerWrongSsid);
+    }
+    else
+    {
+        server->send(200, "text/html", pageWiFiSetupServerOk);
 
-void WiFiSetup::handleGetConfiguration()
-{
-    logDebug("WebServer: Current configuration called!");
+        Preferences preferences;
+        preferences.begin(PREFERENCES_WIFI, false);
+
+        preferences.putString(SETTING_SSID, ssid);
+        preferences.putString(SETTING_PASSWORD, password);
+
+        preferences.end();
+
+        ESP.restart();
+    }
 }
