@@ -6,7 +6,7 @@ const char pageWiFiSetupServerOk[] PROGMEM = R"=====(
 <head>
   <link
     rel="stylesheet"
-    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+    href="/bootstrap.min.css"
   />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
@@ -24,5 +24,6 @@ const char pageWiFiSetupServerOk[] PROGMEM = R"=====(
       </div>
     </div>
 </body>
+
 
 )=====";

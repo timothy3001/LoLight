@@ -17,19 +17,25 @@ class WiFiSetup
 {
 public:
   static void setup();
+  static char *hostnamePrefix;
 
 private:
   static const char *PREFERENCES_WIFI;
   static const char *SETTING_SSID;
   static const char *SETTING_PASSWORD;
 
+  static bool doRestart;
+
   static void logDebug(String message);
-  static void runWiFiConfigurationServer();
+  static void runWiFiConfigurationServer(String apName);
   static bool readWifiSettings(char *&ssid, char *&password);
+  static void WiFiEventHandler(WiFiEvent_t event, system_event_info_t info);
 
   static void handleNotFound();
   static void handleRoot();
   static void handlePostConfiguration();
+
+  static String getHostname();
 
   static WebServer *server;
 };

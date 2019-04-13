@@ -15,6 +15,7 @@ const char pageWiFiSetupServerRoot[] PROGMEM = R"=====(
   <div class="container">
     <div class="page-header">
       <h1>WiFi setup</h1>
+      <hr />
     </div>
     <div class="row">
       <div class="col-sm-6">

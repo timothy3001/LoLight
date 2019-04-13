@@ -4,6 +4,23 @@ WebServer *WiFiSetup::server = NULL;
 const char *WiFiSetup::PREFERENCES_WIFI = "WiFi-Setup";
 const char *WiFiSetup::SETTING_SSID = "ssid";
 const char *WiFiSetup::SETTING_PASSWORD = "password";
+char *WiFiSetup::hostnamePrefix = "WiFiSetup";
+bool WiFiSetup::doRestart = false;
+
+String WiFiSetup::getHostname()
+{
+    uint8_t mac[6];
+    esp_read_mac(mac, ESP_MAC_WIFI_STA);
+
+    String macStringLastPart = "";
+    for (int i = 4; i < 6; i++)
+    {
+        macStringLastPart += String(mac[i], HEX);
+    }
+
+    String apName = String(hostnamePrefix) + String("-") + macStringLastPart;
+    return apName;
+}
 
 bool WiFiSetup::readWifiSettings(char *&ssid, char *&password)
 {
@@ -39,13 +56,18 @@ void WiFiSetup::setup()
 
     bool result = readWifiSettings(ssid, password);
 
+    String hostname = getHostname();
+
     if (result)
     {
         // Try to connect to the access point
         logDebug(String("Connecting to access point with SSID '") + String(ssid) + String("' and password '") + String(password) + String("'..."));
 
-        WiFi.mode(WIFI_AP);
+        WiFi.mode(WIFI_STA);
+        WiFi.disconnect();
         WiFi.begin(ssid, password);
+        WiFi.onEvent(WiFiEventHandler);
+        WiFi.setHostname(hostname.c_str());
 
         unsigned long startTimeConnecting = millis();
         while (WiFi.status() != WL_CONNECTED && millis() < startTimeConnecting + 30000)
@@ -56,7 +78,7 @@ void WiFiSetup::setup()
         if (WiFi.status() != WL_CONNECTED)
         {
             logDebug("Could not connect to configured access point, creating access point...");
-            runWiFiConfigurationServer();
+            runWiFiConfigurationServer(hostname);
         }
         else
         {
@@ -65,7 +87,7 @@ void WiFiSetup::setup()
     }
     else
     {
-        runWiFiConfigurationServer();
+        runWiFiConfigurationServer(hostname);
     }
 
     delete ssid;
@@ -78,25 +100,26 @@ void WiFiSetup::logDebug(String message)
     Serial.println(message);
 }
 
-void WiFiSetup::runWiFiConfigurationServer()
+// Workaround
+void WiFiSetup::WiFiEventHandler(WiFiEvent_t event, system_event_info_t info)
+{
+    switch (event)
+    {
+    case WIFI_REASON_ASSOC_TOOMANY:
+        ESP.restart();
+        break;
+    }
+}
+
+void WiFiSetup::runWiFiConfigurationServer(String apName)
 {
     logDebug("Starting Access point...");
-
-    uint8_t mac[6];
-    esp_read_mac(mac, ESP_MAC_WIFI_STA);
-
-    String macStringLastPart = "";
-    for (int i = 4; i < 6; i++)
-    {
-        macStringLastPart += String(mac[i], HEX);
-    }
-
-    String apName = String("Haloght-") + macStringLastPart;
 
     String logMessage = String("Starting access point with name '") + apName + String("'...");
     logDebug(logMessage);
 
-    WiFi.mode(WIFI_AP_STA);
+    WiFi.mode(WIFI_AP);
+    WiFi.disconnect();
     WiFi.softAP(apName.c_str(), "");
     logDebug("Access point created! Creating web server...");
 
@@ -109,11 +132,20 @@ void WiFiSetup::runWiFiConfigurationServer()
 
     server->begin();
 
-    while (true)
+    while (!doRestart)
     {
         server->handleClient();
         delay(1);
     }
+
+    unsigned long tsWaitForRestart = millis();
+    while (tsWaitForRestart + 10000 > millis())
+    {
+        server->handleClient();
+        delay(1);
+    }
+
+    ESP.restart();
 }
 
 void WiFiSetup::handleNotFound()
@@ -146,8 +178,6 @@ void WiFiSetup::handlePostConfiguration()
     }
     else
     {
-        server->send(200, "text/html", pageWiFiSetupServerOk);
-
         Preferences preferences;
         preferences.begin(PREFERENCES_WIFI, false);
 
@@ -156,6 +186,7 @@ void WiFiSetup::handlePostConfiguration()
 
         preferences.end();
 
-        ESP.restart();
+        server->send(200, "text/html", pageWiFiSetupServerOk);
+        doRestart = true;
     }
 }

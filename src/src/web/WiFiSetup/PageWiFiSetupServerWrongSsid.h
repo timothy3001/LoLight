@@ -1,7 +1,6 @@
 #include <Arduino.h>
 
 const char pageWiFiSetupServerWrongSsid[] PROGMEM = R"=====(
-
 <!DOCTYPE html>
 <head>
   <link
@@ -28,6 +27,5 @@ const char pageWiFiSetupServerWrongSsid[] PROGMEM = R"=====(
     </div>
   </div>
 </body>
-
 
 )=====";

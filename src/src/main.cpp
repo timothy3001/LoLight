@@ -7,6 +7,7 @@ void setup()
     Serial.begin(9600);
 
     Serial.println("Starting WiFi setup...");
+    WiFiSetup::hostnamePrefix = "Haloght";
     WiFiSetup::setup();
 }
 
