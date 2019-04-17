@@ -1,6 +1,7 @@
 #include "WiFiSetup.h"
 
 WebServer *WiFiSetup::server = NULL;
+DNSServer *WiFiSetup::dnsServer = NULL;
 const char *WiFiSetup::PREFERENCES_WIFI = "WiFi-Setup";
 const char *WiFiSetup::SETTING_SSID = "ssid";
 const char *WiFiSetup::SETTING_PASSWORD = "password";
@@ -132,6 +133,8 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
 
     server->begin();
 
+    dnsServer->start(53, "*", WiFi.localIP());
+
     while (!doRestart)
     {
         server->handleClient();
@@ -142,6 +145,7 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
     while (tsWaitForRestart + 10000 > millis())
     {
         server->handleClient();
+        dnsServer->processNextRequest();
         delay(1);
     }
 

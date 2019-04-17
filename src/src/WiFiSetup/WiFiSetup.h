@@ -6,6 +6,7 @@
 #include <WebServer.h>
 #include <Preferences.h>
 #include <esp_system.h>
+#include <DNSServer.h>
 
 #include "../WebServerExtensions/WebServerExtensions.h"
 #include "../web/WiFiSetup/PageWiFiSetupServerRoot.h"
@@ -38,6 +39,7 @@ private:
   static String getHostname();
 
   static WebServer *server;
+  static DNSServer *dnsServer;
 };
 
 #endif
