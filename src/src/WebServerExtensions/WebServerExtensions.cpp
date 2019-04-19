@@ -31,3 +31,8 @@ void WebServerExtensions::registerLargeFileEndpoint(String endPointName, String 
         Serial.println("\n");
     });
 }
+
+void WebServerExtensions::registerBootstrap(WebServer &server)
+{
+    registerLargeFileEndpoint("/bootstrap.min.css", "text/css; charset=utf-8", server, bootstrapMinCss, sizeof(bootstrapMinCss) / sizeof(byte));
+}

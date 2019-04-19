@@ -8,6 +8,8 @@ void setup()
 
     Serial.println("Starting WiFi setup...");
     WiFiSetup::hostnamePrefix = "Haloght";
+
+    // In case WiFi needs to be setup this is a blocking call and the ESP will be rebooted. After this call, WiFi works fine.
     WiFiSetup::setup();
 }
 

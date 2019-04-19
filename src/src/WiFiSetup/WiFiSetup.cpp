@@ -129,7 +129,7 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
     server->onNotFound(handleNotFound);
     server->on("/", handleRoot);
     server->on("/config", HTTP_POST, handlePostConfiguration);
-    WebServerExtensions::registerLargeFileEndpoint("/bootstrap.min.css", "text/css; charset=utf-8", *server, bootstrapMinCss, sizeof(bootstrapMinCss) / sizeof(byte));
+    WebServerExtensions::registerBootstrap(*server);
 
     server->begin();
 
