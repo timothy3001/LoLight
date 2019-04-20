@@ -97,8 +97,10 @@ void WiFiSetup::setup()
 
 void WiFiSetup::logDebug(String message)
 {
+#ifdef DEBUG
     Serial.print("WiFiSetup: ");
     Serial.println(message);
+#endif
 }
 
 // Workaround
@@ -126,10 +128,10 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
 
     server = new WebServer(80);
 
-    server->onNotFound(handleNotFound);
     server->on("/", handleRoot);
     server->on("/config", HTTP_POST, handlePostConfiguration);
     WebServerExtensions::registerBootstrap(*server);
+    WebServerExtensions::registerNotFound(*server);
 
     server->begin();
 
@@ -141,6 +143,7 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
         delay(1);
     }
 
+    logDebug("ESP about to restart...");
     unsigned long tsWaitForRestart = millis();
     while (tsWaitForRestart + 10000 > millis())
     {
@@ -152,12 +155,6 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
     ESP.restart();
 }
 
-void WiFiSetup::handleNotFound()
-{
-    logDebug("WebServer: Unknown URL called!");
-    server->send(404, "text/plain", "Not found!");
-}
-
 void WiFiSetup::handleRoot()
 {
     logDebug("WebServer: Root called");
@@ -167,11 +164,6 @@ void WiFiSetup::handleRoot()
 void WiFiSetup::handlePostConfiguration()
 {
     logDebug("WebServer: New configuration posted!");
-
-    for (int i = 0; i < server->args(); i++)
-    {
-        logDebug(String("Param '") + server->argName(i) + String("' has value '") + server->arg(i) + String("'"));
-    }
 
     String ssid = server->arg("ssid");
     String password = server->arg("password");

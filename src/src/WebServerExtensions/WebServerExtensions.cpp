@@ -36,3 +36,8 @@ void WebServerExtensions::registerBootstrap(WebServer &server)
 {
     registerLargeFileEndpoint("/bootstrap.min.css", "text/css; charset=utf-8", server, bootstrapMinCss, sizeof(bootstrapMinCss) / sizeof(byte));
 }
+
+void WebServerExtensions::registerNotFound(WebServer &server)
+{
+    server.send(404, "text/plain", "Not found!");
+}

@@ -1,6 +1,10 @@
+
 #include <Arduino.h>
 #include <WiFi.h>
+
+#define DEBUG
 #include "WiFiSetup/WiFiSetup.h"
+#include "LedSetup/LedSetup.h"
 
 void setup()
 {
@@ -11,6 +15,9 @@ void setup()
 
     // In case WiFi needs to be setup this is a blocking call and the ESP will be rebooted. After this call, WiFi works fine.
     WiFiSetup::setup();
+
+    // LED settings will be read from preferences. If it is not configured yet, a web server for configuration will be started.
+    LedSetup::setup();
 }
 
 void loop()

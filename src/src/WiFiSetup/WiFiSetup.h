@@ -12,7 +12,6 @@
 #include "../web/WiFiSetup/PageWiFiSetupServerRoot.h"
 #include "../web/WiFiSetup/PageWiFiSetupServerWrongSsid.h"
 #include "../web/WiFiSetup/PageWiFiSetupServerOk.h"
-#include "../web/bootstrap-min-css.h"
 
 class WiFiSetup
 {
@@ -32,7 +31,6 @@ private:
   static bool readWifiSettings(char *&ssid, char *&password);
   static void WiFiEventHandler(WiFiEvent_t event, system_event_info_t info);
 
-  static void handleNotFound();
   static void handleRoot();
   static void handlePostConfiguration();
 
