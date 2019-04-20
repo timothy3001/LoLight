@@ -6,25 +6,24 @@ WebServer *LedSetup::webServer = NULL;
 DNSServer *LedSetup::dnsServer = NULL;
 int LedSetup::amountLeds = 0;
 bool LedSetup::doRestart = false;
+bool LedSetup::configurationValid = false;
 
-void LedSetup::setup()
+void LedSetup::loadConfiguration()
 {
     Preferences preferences;
-
     preferences.begin(PREFERENCES_LEDSETUP, true);
 
     String ledAmount = preferences.getString(SETTING_LED_AMOUNT, String(""));
+
+    configurationValid = false;
     if (ledAmount.length() != 0)
     {
         amountLeds = atoi(ledAmount.c_str());
-    }
-    else
-    {
-        runLedSetupServer();
+        configurationValid = true;
     }
 }
 
-void LedSetup::runLedSetupServer()
+void LedSetup::setup()
 {
     logDebug("Starting WebServer for LED setup...");
     webServer = new WebServer(80);
@@ -58,6 +57,11 @@ void LedSetup::runLedSetupServer()
 int LedSetup::getAmountLeds()
 {
     return amountLeds;
+}
+
+bool LedSetup::isConfigurationValid()
+{
+    return configurationValid;
 }
 
 void LedSetup::logDebug(String message)

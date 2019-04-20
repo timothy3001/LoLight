@@ -11,16 +11,18 @@ class LedSetup
 {
 public:
   static void setup();
+  static void loadConfiguration();
   static int getAmountLeds();
+  static bool isConfigurationValid();
 
 private:
-  static void runLedSetupServer();
   static void logDebug(String message);
 
   static void handleRoot();
   static void handlePostConfiguration();
 
   static int amountLeds;
+  static bool configurationValid;
   static bool doRestart;
 
   static const char *PREFERENCES_LEDSETUP;

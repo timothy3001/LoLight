@@ -10,14 +10,25 @@ void setup()
 {
     Serial.begin(9600);
 
+    Serial.println("Reading LED config...");
+    LedSetup::loadConfiguration();
+
+    if (LedSetup::isConfigurationValid())
+    {
+        // Turn LEDs on to desired state
+    }
+
     Serial.println("Starting WiFi setup...");
     WiFiSetup::hostnamePrefix = "Haloght";
 
     // In case WiFi needs to be setup this is a blocking call and the ESP will be rebooted. After this call, WiFi works fine.
     WiFiSetup::setup();
 
-    // LED settings will be read from preferences. If it is not configured yet, a web server for configuration will be started.
-    LedSetup::setup();
+    // LED settings will be read from preferences. If it is not configured yet a web server for configuration will be started and the ESP reboots afterwards.
+    if (!LedSetup::isConfigurationValid())
+    {
+        LedSetup::setup();
+    }
 }
 
 void loop()
