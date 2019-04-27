@@ -6,6 +6,8 @@
 #include <DNSServer.h>
 
 #include "../WebServerExtensions/WebServerExtensions.h"
+#include "../web/LedSetup/PageLedSetupServerInvalidSettings.h"
+#include "../web/LedSetup/PageLedSetupServerOk.h"
 
 class LedSetup
 {
@@ -20,6 +22,7 @@ private:
 
   static void handleRoot();
   static void handlePostConfiguration();
+  static bool validateAndReadSettings(WebServer *server, int *dataPin, int *numLeds);
 
   static int amountLeds;
   static bool configurationValid;
@@ -27,6 +30,7 @@ private:
 
   static const char *PREFERENCES_LEDSETUP;
   static const char *SETTING_LED_AMOUNT;
+  static const char *SETTING_DATA_PIN;
 
   static WebServer *webServer;
   static DNSServer *dnsServer;

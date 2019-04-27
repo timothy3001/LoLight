@@ -16,6 +16,7 @@ void setup()
     if (LedSetup::isConfigurationValid())
     {
         // Turn LEDs on to desired state
+        Serial.println("Valid config found, turning LEDs to desired state on...");
     }
 
     Serial.println("Starting WiFi setup...");
@@ -27,8 +28,11 @@ void setup()
     // LED settings will be read from preferences. If it is not configured yet a web server for configuration will be started and the ESP reboots afterwards.
     if (!LedSetup::isConfigurationValid())
     {
+        Serial.println("LED config is not valid thus starting LED setup...");
         LedSetup::setup();
     }
+
+    Serial.println("WiFi and LEDs setup successful! Starting regular operation...");
 }
 
 void loop()
