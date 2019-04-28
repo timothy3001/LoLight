@@ -36,7 +36,7 @@ void setup()
         Serial.println("Valid config found, turning LEDs on to desired state...");
         ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds());
 
-        ledController->setSolidColor(255, 255, 255, 255);
+        ledController->setSolidColor(127, 127, 127);
     }
 
     Serial.println("Starting WiFi setup...");
