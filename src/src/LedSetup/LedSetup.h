@@ -11,13 +11,15 @@
 #include "../WebServerExtensions/WebServerExtensions.h"
 #include "../web/LedSetup/PageLedSetupServerInvalidSettings.h"
 #include "../web/LedSetup/PageLedSetupServerOk.h"
+#include "../web/LedSetup/PageLedSetupServerRoot.h"
 
 class LedSetup
 {
 public:
   static void setup();
   static void loadConfiguration();
-  static int getAmountLeds();
+  static int getNumLeds();
+  static int getDataPin();
   static bool isConfigurationValid();
 
 private:
@@ -27,7 +29,8 @@ private:
   static void handlePostConfiguration();
   static bool validateAndReadSettings(WebServer *server, int *dataPin, int *numLeds);
 
-  static int amountLeds;
+  static int numLeds;
+  static int dataPin;
   static bool configurationValid;
   static bool doRestart;
 

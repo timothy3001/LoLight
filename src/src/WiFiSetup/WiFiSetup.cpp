@@ -127,6 +127,7 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
     logDebug("Access point created! Creating web server...");
 
     server = new WebServer(80);
+    dnsServer = new DNSServer();
 
     server->on("/", handleRoot);
     server->on("/config", HTTP_POST, handlePostConfiguration);

@@ -6,7 +6,8 @@ const char *LedSetup::SETTING_DATA_PIN = "dataPin";
 
 WebServer *LedSetup::webServer = NULL;
 DNSServer *LedSetup::dnsServer = NULL;
-int LedSetup::amountLeds = 0;
+int LedSetup::numLeds = -1;
+int LedSetup::dataPin = -1;
 bool LedSetup::doRestart = false;
 bool LedSetup::configurationValid = false;
 
@@ -15,12 +16,13 @@ void LedSetup::loadConfiguration()
     Preferences preferences;
     preferences.begin(PREFERENCES_LEDSETUP, true);
 
-    String ledAmount = preferences.getString(SETTING_LED_AMOUNT, String(""));
-
     configurationValid = false;
-    if (ledAmount.length() != 0)
+
+    numLeds = preferences.getInt(SETTING_LED_AMOUNT, -1);
+    dataPin = preferences.getInt(SETTING_DATA_PIN, -1);
+
+    if (numLeds > 0 && dataPin >= 0)
     {
-        amountLeds = atoi(ledAmount.c_str());
         configurationValid = true;
     }
 }
@@ -29,13 +31,13 @@ void LedSetup::setup()
 {
     logDebug("Starting WebServer for LED setup...");
     webServer = new WebServer(80);
+    dnsServer = new DNSServer();
 
     webServer->on("/", handleRoot);
     webServer->on("/config", HTTP_POST, handlePostConfiguration);
     WebServerExtensions::registerBootstrap(*webServer);
 
     webServer->begin();
-
     dnsServer->start(53, "*", WiFi.localIP());
 
     while (!doRestart)
@@ -56,9 +58,14 @@ void LedSetup::setup()
     ESP.restart();
 }
 
-int LedSetup::getAmountLeds()
+int LedSetup::getNumLeds()
 {
-    return amountLeds;
+    return numLeds;
+}
+
+int LedSetup::getDataPin()
+{
+    return dataPin;
 }
 
 bool LedSetup::isConfigurationValid()
@@ -66,33 +73,24 @@ bool LedSetup::isConfigurationValid()
     return configurationValid;
 }
 
-void LedSetup::logDebug(String message)
-{
-#ifdef DEBUG
-    Serial.print("LedSetup: ");
-    Serial.println(message);
-#endif
-}
-
 void LedSetup::handleRoot()
 {
     logDebug("WebServer: Root called!");
-    webServer->send(200, "text/html", pageLedSetupServerOk);
+    webServer->send(200, "text/html", pageLedSetupServerRoot);
 }
 
 void LedSetup::handlePostConfiguration()
 {
     logDebug("WebServer: Post configuration called!");
 
-    int dataPin;
-    int numLeds;
-
     if (!validateAndReadSettings(webServer, &dataPin, &numLeds))
     {
+        logDebug("Invalid parameters!");
         webServer->send(400, "text/html", pageLedSetupServerInvalidSettings);
     }
     else
     {
+        logDebug(String("Valid configuration submitted: dataPin: '") + String(dataPin) + String("' numLeds: '") + String(numLeds) + String("'"));
         Preferences preferences;
         preferences.begin(PREFERENCES_LEDSETUP, false);
 
@@ -106,7 +104,7 @@ void LedSetup::handlePostConfiguration()
     }
 }
 
-bool LedSetup::validateAndReadSettings(WebServer *server, int *dataPin, int *numLeds)
+bool LedSetup::validateAndReadSettings(WebServer *server, int *postDataPin, int *postNumLeds)
 {
     String dataPinString = webServer->arg("dataPin");
     String numLedsString = webServer->arg("numLeds");
@@ -114,14 +112,22 @@ bool LedSetup::validateAndReadSettings(WebServer *server, int *dataPin, int *num
     if (dataPinString.length() != 0 && numLedsString.length() != 0)
     {
         // Problem to solve: if toInt() fails, 0 is returned. But 0 is also a valid value for a pin. Thus we cannot check for error here in backend.
-        *dataPin = dataPinString.toInt();
-        *numLeds = numLedsString.toInt();
+        *postDataPin = dataPinString.toInt();
+        *postNumLeds = numLedsString.toInt();
 
-        if (*numLeds != 0)
+        if (*postNumLeds != 0)
         {
             return true;
         }
     }
 
     return false;
+}
+
+void LedSetup::logDebug(String message)
+{
+#ifdef DEBUG
+    Serial.print("LedSetup: ");
+    Serial.println(message);
+#endif
 }
