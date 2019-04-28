@@ -5,7 +5,6 @@ const char *LedSetup::SETTING_LED_AMOUNT = "ledAmount";
 const char *LedSetup::SETTING_DATA_PIN = "dataPin";
 
 WebServer *LedSetup::webServer = NULL;
-DNSServer *LedSetup::dnsServer = NULL;
 int LedSetup::numLeds = -1;
 int LedSetup::dataPin = -1;
 bool LedSetup::doRestart = false;
@@ -31,14 +30,12 @@ void LedSetup::setup()
 {
     logDebug("Starting WebServer for LED setup...");
     webServer = new WebServer(80);
-    dnsServer = new DNSServer();
 
     webServer->on("/", handleRoot);
     webServer->on("/config", HTTP_POST, handlePostConfiguration);
     WebServerExtensions::registerBootstrap(*webServer);
 
     webServer->begin();
-    dnsServer->start(53, "*", WiFi.localIP());
 
     while (!doRestart)
     {
@@ -51,7 +48,6 @@ void LedSetup::setup()
     while (tsWaitForRestart + 10000 > millis())
     {
         webServer->handleClient();
-        dnsServer->processNextRequest();
         delay(1);
     }
 

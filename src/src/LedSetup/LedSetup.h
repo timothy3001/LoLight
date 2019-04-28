@@ -6,7 +6,6 @@
 #include <WebServer.h>
 #include <Preferences.h>
 #include <esp_system.h>
-#include <DNSServer.h>
 
 #include "../WebServerExtensions/WebServerExtensions.h"
 #include "../web/LedSetup/PageLedSetupServerInvalidSettings.h"
@@ -39,7 +38,6 @@ private:
   static const char *SETTING_DATA_PIN;
 
   static WebServer *webServer;
-  static DNSServer *dnsServer;
 };
 
 #endif

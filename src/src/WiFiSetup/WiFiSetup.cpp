@@ -84,6 +84,16 @@ void WiFiSetup::setup()
         else
         {
             logDebug("Successfully connected to WiFi!");
+            logDebug("Setting up mDNS...");
+            if (!MDNS.begin(hostname.c_str()))
+            {
+                logDebug("Could not setup mDNS!");
+            }
+            else
+            {
+                logDebug(String("mDNS setup successfully! Hostname: ") + String(hostname));
+                MDNS.addService("http", "tcp", 80);
+            }
         }
     }
     else
@@ -116,8 +126,6 @@ void WiFiSetup::WiFiEventHandler(WiFiEvent_t event, system_event_info_t info)
 
 void WiFiSetup::runWiFiConfigurationServer(String apName)
 {
-    logDebug("Starting Access point...");
-
     String logMessage = String("Starting access point with name '") + apName + String("'...");
     logDebug(logMessage);
 

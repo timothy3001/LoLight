@@ -1,11 +1,30 @@
 #include <Arduino.h>
 #include <WiFi.h>
+#include <Preferences.h>
 
 #include "WiFiSetup/WiFiSetup.h"
 #include "LedSetup/LedSetup.h"
+#include "LedController/LedController.h"
+
+LedController *ledController;
+
+void resetPreferences()
+{
+    Preferences preferencesLedSetup;
+    Preferences preferencesWiFiSetup;
+    preferencesLedSetup.begin("Led-Setup", false);
+    preferencesWiFiSetup.begin("WiFi-Setup", false);
+    preferencesLedSetup.clear();
+    preferencesWiFiSetup.clear();
+    preferencesLedSetup.end();
+    preferencesWiFiSetup.end();
+}
 
 void setup()
 {
+    // Reset preferences
+    //resetPreferences();
+
     Serial.begin(9600);
 
     Serial.println("Reading LED config...");
@@ -14,7 +33,10 @@ void setup()
     if (LedSetup::isConfigurationValid())
     {
         // Turn LEDs on to desired state
-        Serial.println("Valid config found, turning LEDs to desired state on...");
+        Serial.println("Valid config found, turning LEDs on to desired state...");
+        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds());
+
+        ledController->setSolidColor(255, 255, 255, 255);
     }
 
     Serial.println("Starting WiFi setup...");
