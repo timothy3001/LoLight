@@ -1,8 +1,6 @@
-
 #include <Arduino.h>
 #include <WiFi.h>
 
-#define DEBUG
 #include "WiFiSetup/WiFiSetup.h"
 #include "LedSetup/LedSetup.h"
 

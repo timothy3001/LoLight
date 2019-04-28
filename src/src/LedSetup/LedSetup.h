@@ -1,3 +1,6 @@
+#ifndef LedSetup_h_
+#define LedSetup_h_
+
 #include <Arduino.h>
 
 #include <WebServer.h>
@@ -35,3 +38,5 @@ private:
   static WebServer *webServer;
   static DNSServer *dnsServer;
 };
+
+#endif
