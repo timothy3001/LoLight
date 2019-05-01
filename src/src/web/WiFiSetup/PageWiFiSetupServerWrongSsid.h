@@ -13,7 +13,7 @@ const char pageWiFiSetupServerWrongSsid[] PROGMEM = R"=====(
 
 <body>
   <div class="container">
-    <div class="page-header">
+    <div class="page-header mt-4">
       <h1>WiFi setup</h1>
       <hr />
     </div>
