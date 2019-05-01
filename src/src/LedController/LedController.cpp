@@ -35,6 +35,8 @@ void LedController::handle()
 
 void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b)
 {
+    logDebug("Setting solid color r: '" + String(r) + "' g: '" + String(g) + "' b: '" + String(b) + "'...");
+
     if (currentVisualization)
         delete currentVisualization;
     currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(r, g, b);
@@ -70,6 +72,14 @@ void LedController::calculateRgbToRgbw(uint8_t *r, uint8_t *g, uint8_t *b, uint8
     *g = gamma8Correction[*g - tiniest];
     *b = gamma8Correction[*b - tiniest];
     *w = gamma8Correction[tiniest];
+}
+
+void LedController::logDebug(String message)
+{
+#ifdef DEBUG
+    Serial.print("LedController: ");
+    Serial.println(message);
+#endif
 }
 
 const uint8_t LedController::gamma8Correction[] = {

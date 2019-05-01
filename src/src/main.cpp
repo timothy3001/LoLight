@@ -5,8 +5,10 @@
 #include "WiFiSetup/WiFiSetup.h"
 #include "LedSetup/LedSetup.h"
 #include "LedController/LedController.h"
+#include "HaloghtServer/HaloghtServer.h"
 
 LedController *ledController;
+HaloghtServer *haloghtServer;
 
 void resetPreferences()
 {
@@ -37,6 +39,7 @@ void setup()
         ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds());
 
         ledController->setSolidColor(127, 127, 127);
+        ledController->handle();
     }
 
     Serial.println("Starting WiFi setup...");
@@ -53,9 +56,14 @@ void setup()
     }
 
     Serial.println("WiFi and LEDs setup successful! Starting regular operation...");
+    if (!ledController)
+        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds());
+
+    haloghtServer = new HaloghtServer(ledController);
 }
 
 void loop()
 {
-    // put your main code here, to run repeatedly:
+    haloghtServer->handleClient();
+    ledController->handle();
 }
