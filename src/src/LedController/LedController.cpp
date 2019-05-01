@@ -4,19 +4,53 @@ LedController::LedController(int dataPin, int numLeds)
 {
     this->dataPin = dataPin;
     this->numLeds = numLeds;
+    this->currentLedValues = new LedValue[numLeds];
 
     this->strip = new Adafruit_NeoPixel(this->numLeds, this->dataPin, NEO_GRBW + NEO_KHZ800);
     strip->begin();
     strip->show();
 }
 
+LedController::~LedController()
+{
+    delete this->strip;
+    delete this->currentLedValues;
+    if (this->currentVisualization)
+        delete this->currentVisualization;
+}
+
+void LedController::handle()
+{
+    if (currentVisualization)
+    {
+        ulong now = millis();
+        if (nextCheck <= now)
+        {
+            uint delay = currentVisualization->handle(currentLedValues, numLeds);
+            setPixels();
+            nextCheck = delay == 0 ? 0 : millis() + delay;
+        }
+    }
+}
+
 void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b)
 {
-    uint8_t w = 0;
-    calculateRgbToRgbw(&r, &g, &b, &w);
+    if (currentVisualization)
+        delete currentVisualization;
+    currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(r, g, b);
+    nextCheck = 0;
+}
 
-    for (int i = 0; i < this->numLeds; i++)
+void LedController::setPixels()
+{
+    for (int i = 0; i < numLeds; i++)
     {
+        uint8_t w = 0;
+        uint8_t r = currentLedValues[i].red;
+        uint8_t g = currentLedValues[i].green;
+        uint8_t b = currentLedValues[i].blue;
+        calculateRgbToRgbw(&r, &g, &b, &w);
+
         strip->setPixelColor(i, r, g, b, w);
     }
     strip->show();
@@ -36,11 +70,6 @@ void LedController::calculateRgbToRgbw(uint8_t *r, uint8_t *g, uint8_t *b, uint8
     *g = gamma8Correction[*g - tiniest];
     *b = gamma8Correction[*b - tiniest];
     *w = gamma8Correction[tiniest];
-}
-
-LedController::~LedController()
-{
-    delete this->strip;
 }
 
 const uint8_t LedController::gamma8Correction[] = {
