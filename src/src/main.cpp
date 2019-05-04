@@ -25,7 +25,7 @@ void resetPreferences()
 void setup()
 {
     // Reset preferences
-    //resetPreferences();
+    // resetPreferences();
 
     Serial.begin(9600);
 
@@ -38,7 +38,7 @@ void setup()
         Serial.println("Valid config found, turning LEDs on to desired state...");
         ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds());
 
-        ledController->setSolidColor(127, 127, 127);
+        ledController->setSolidColor(255, 255, 255);
         ledController->handle();
     }
 

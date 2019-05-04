@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <WebServer.h>
+#include <Update.h>
 
 #include "../LedController/LedController.h"
 #include "../web/HaloghtServer/PageHaloghtServerRoot.h"
@@ -16,6 +17,8 @@ private:
 
     void handleRoot();
     void handleSetSolidColor();
+    void handleUpdate();
+    void handleUpdateUpload();
 
     void extractColorFromString(String str, uint8_t *r, uint8_t *g, uint8_t *b);
     void logDebug(String message);

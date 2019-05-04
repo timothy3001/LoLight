@@ -7,6 +7,7 @@ HaloghtServer::HaloghtServer(LedController *ledController)
 
     webServer->on("/", [&]() -> void { this->handleRoot(); });
     webServer->on("/setSolidColor", HTTP_POST, [&]() -> void { this->handleSetSolidColor(); });
+    webServer->on("/update", HTTP_POST, [&]() -> void { this->handleUpdate(); }, [&]() -> void { this->handleUpdateUpload(); });
     WebServerExtensions::registerBootstrap(*webServer);
     WebServerExtensions::registerNotFound(*webServer);
 
@@ -53,9 +54,52 @@ void HaloghtServer::handleSetSolidColor()
     }
 }
 
+void HaloghtServer::handleUpdate()
+{
+    logDebug("Handling update...");
+
+    webServer->sendHeader("Connection", "close");
+    webServer->send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
+    ESP.restart();
+}
+
+void HaloghtServer::handleUpdateUpload()
+{
+    HTTPUpload &upload = webServer->upload();
+    if (upload.status == UPLOAD_FILE_START)
+    {
+        logDebug(String("Update: ") + String(upload.filename.c_str()));
+        if (!Update.begin(UPDATE_SIZE_UNKNOWN))
+        {
+            // Error while flashing new software
+            Update.printError(Serial);
+        }
+    }
+    else if (upload.status == UPLOAD_FILE_WRITE)
+    {
+        // Flashing process
+        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize)
+        {
+            Update.printError(Serial);
+        }
+    }
+    else if (upload.status == UPLOAD_FILE_END)
+    {
+        if (Update.end(true))
+        {
+            // Flashing finished
+            logDebug("Update Success: " + String(upload.totalSize) + String(" bytes updated!"));
+            logDebug("Rebooting...");
+        }
+        else
+        {
+            Update.printError(Serial);
+        }
+    }
+}
+
 void HaloghtServer::extractColorFromString(String str, uint8_t *r, uint8_t *g, uint8_t *b)
 {
-
     char color[8];
     str.toCharArray(color, 8);
 
