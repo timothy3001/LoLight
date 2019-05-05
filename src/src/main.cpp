@@ -38,7 +38,7 @@ void setup()
         Serial.println("Valid config found, turning LEDs on to desired state...");
         ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds());
 
-        ledController->setSolidColor(255, 255, 255);
+        ledController->setTwoColorBlending(255, 23, 23, 255, 238, 23);
         ledController->handle();
     }
 

@@ -26,7 +26,7 @@ void LedController::handle()
         ulong now = millis();
         if (nextCheck <= now)
         {
-            uint delay = currentVisualization->handle(currentLedValues, numLeds);
+            uint delay = currentVisualization->handle(currentLedValues);
             setPixels();
             nextCheck = delay == 0 ? 0 : millis() + delay;
         }
@@ -39,7 +39,16 @@ void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b)
 
     if (currentVisualization)
         delete currentVisualization;
-    currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(r, g, b);
+    currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, r, g, b);
+    nextCheck = 0;
+}
+
+void LedController::setTwoColorBlending(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2)
+{
+    logDebug("Setting two color blending r1: '" + String(r1) + "' g1: '" + String(g1) + "' b1: '" + String(b1) + "' r2: '" + String(r2) + "' g2: '" + String(g2) + "' b2: '" + String(b2) + "'...");
+    if (currentVisualization)
+        delete currentVisualization;
+    currentVisualization = (LedVisualizationBase *)new LedVisualizationTwoColorBlending(numLeds, 2000, r1, g1, b1, r2, g2, b2);
     nextCheck = 0;
 }
 

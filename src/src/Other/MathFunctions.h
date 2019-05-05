@@ -22,6 +22,30 @@ public:
 
         return progress;
     }
+
+    static float CubicInEase(float progress)
+    {
+        return progress * progress * progress;
+    }
+
+    static float handleOverflowingFloat(float f)
+    {
+        if (f > 1.0F)
+            return f - floorf(f);
+        return f;
+    }
+
+    static float reverseOverPoint5(float f)
+    {
+        if (f <= 0.5F)
+        {
+            return f;
+        }
+        else
+        {
+            return 1 - f;
+        }
+    }
 };
 
 #endif

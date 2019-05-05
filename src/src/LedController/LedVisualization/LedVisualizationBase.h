@@ -18,7 +18,7 @@ public:
 
     // Updates the LED array and returns a wait time, when it should be called next.
     // ATTENTION: Don't forget to yield() sometimes so that WiFi and so on won't crash!
-    virtual uint handle(LedValue leds[], int ledsSize);
+    virtual uint handle(LedValue leds[]);
 };
 
 #endif
