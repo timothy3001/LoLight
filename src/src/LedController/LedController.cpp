@@ -68,6 +68,24 @@ void LedController::setPixels()
     strip->Show();
 }
 
+// Currently only used for debugging purposes.
+void LedController::setPixelsFullSpectrum()
+{
+    for (int i = 0; i < numLeds; i++)
+    {
+        uint8_t w = 0;
+        uint8_t r = currentLedValues[i].red;
+        uint8_t g = currentLedValues[i].green;
+        uint8_t b = currentLedValues[i].blue;
+        calculateRgbToRgbw(&r, &g, &b, &w);
+
+        RgbwColor color(r + w, g + w, b + w, w);
+        strip->SetPixelColor(i, color);
+    }
+
+    strip->Show();
+}
+
 void LedController::calculateRgbToRgbw(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *w)
 {
     int tiniest = 255;
