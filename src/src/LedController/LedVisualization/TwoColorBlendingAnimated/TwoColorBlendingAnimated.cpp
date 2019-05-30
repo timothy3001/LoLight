@@ -1,6 +1,6 @@
-#include "LedVisualizationTwoColorBlending.h"
+#include "TwoColorBlendingAnimated.h"
 
-LedVisualizationTwoColorBlending::LedVisualizationTwoColorBlending(int ledsSize, int cycleDurationMs, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2)
+TwoColorBlendingAnimated::TwoColorBlendingAnimated(int ledsSize, int cycleDurationMs, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2)
 {
     this->ledsSize = ledsSize;
     this->cycleDurationMs = cycleDurationMs;
@@ -20,11 +20,11 @@ LedVisualizationTwoColorBlending::LedVisualizationTwoColorBlending(int ledsSize,
     }
 }
 
-LedVisualizationTwoColorBlending::~LedVisualizationTwoColorBlending()
+TwoColorBlendingAnimated::~TwoColorBlendingAnimated()
 {
 }
 
-uint LedVisualizationTwoColorBlending::handle(LedValue leds[])
+uint TwoColorBlendingAnimated::handle(LedValue leds[])
 {
     float progressStep = (millis() % this->cycleDurationMs) / (float)cycleDurationMs;
 
