@@ -17,6 +17,8 @@ private:
 
     void handleRoot();
     void handleSetSolidColor();
+    void handleFire();
+
     void handleUpdate();
     void handleUpdateUpload();
 
