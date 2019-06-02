@@ -8,6 +8,7 @@ HaloghtServer::HaloghtServer(LedController *ledController)
     webServer->on("/", [&]() -> void { this->handleRoot(); });
     webServer->on("/setSolidColor", HTTP_POST, [&]() -> void { this->handleSetSolidColor(); });
     webServer->on("/sendFire", HTTP_POST, [&]() -> void { this->handleFire(); });
+    webServer->on("/sendWater", HTTP_POST, [&]() -> void { this->handleWater(); });
     webServer->on("/update", HTTP_POST, [&]() -> void { this->handleUpdate(); }, [&]() -> void { this->handleUpdateUpload(); });
     WebServerExtensions::registerBootstrap(*webServer);
     WebServerExtensions::registerNotFound(*webServer);
@@ -60,6 +61,14 @@ void HaloghtServer::handleFire()
     logDebug("SendFire called!");
 
     ledController->setTwoColorBlendingAnimated(255, 23, 23, 255, 238, 23);
+    webServer->send(200, "text/plain", "OK");
+}
+
+void HaloghtServer::handleWater()
+{
+    logDebug("SendWater called!");
+
+    ledController->setTwoColorBlendingAnimated(0, 73, 191, 0, 237, 255);
     webServer->send(200, "text/plain", "OK");
 }
 
