@@ -88,18 +88,20 @@ void LedController::setPixelsFullSpectrum()
 
 void LedController::calculateRgbToRgbw(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *w)
 {
-    int tiniest = 255;
-    if (*r < tiniest)
-        tiniest = *r;
-    if (*g < tiniest)
-        tiniest = *g;
-    if (*b < tiniest)
-        tiniest = *b;
+    int whitePart = 255;
+    if (*r < whitePart)
+        whitePart = *r;
+    if (*g < whitePart)
+        whitePart = *g;
+    if (*b < whitePart)
+        whitePart = *b;
 
-    *r = gamma8Correction[*r - tiniest];
-    *g = gamma8Correction[*g - tiniest];
-    *b = gamma8Correction[*b - tiniest];
-    *w = gamma8Correction[tiniest];
+    int whitePartSubtrahend = (int)ceil(whitePart / (float)3);
+
+    *r = gamma8Correction[*r - whitePartSubtrahend];
+    *g = gamma8Correction[*g - whitePartSubtrahend];
+    *b = gamma8Correction[*b - whitePartSubtrahend];
+    *w = gamma8Correction[whitePart];
 }
 
 void LedController::logDebug(String message)
