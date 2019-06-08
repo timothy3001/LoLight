@@ -16,7 +16,7 @@ public:
     void handle();
 
     void setSolidColor(uint8_t r, uint8_t g, uint8_t b);
-    void setTwoColorBlendingAnimated(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2);
+    void setTwoColorBlendingAnimated(int cycleDuration, bool randomStartOrder, bool useLinearEase, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2);
 
 private:
     static const uint8_t gamma8Correction[];

@@ -14,6 +14,11 @@ public:
         return progress * progress;
     }
 
+    static float CompleteQuadraticEase(float progress)
+    {
+        return -pow((2 * progress) - 1, 2.0F) + 1;
+    }
+
     static float CubicOutEase(float progress)
     {
         progress -= 1.0f;

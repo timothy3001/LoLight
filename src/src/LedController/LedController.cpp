@@ -43,12 +43,12 @@ void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b)
     nextCheck = 0;
 }
 
-void LedController::setTwoColorBlendingAnimated(uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2)
+void LedController::setTwoColorBlendingAnimated(int cycleDuration, bool randomStartOrder, bool useLinearEase, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2)
 {
     logDebug("Setting two color blending r1: '" + String(r1) + "' g1: '" + String(g1) + "' b1: '" + String(b1) + "' r2: '" + String(r2) + "' g2: '" + String(g2) + "' b2: '" + String(b2) + "'...");
     if (currentVisualization)
         delete currentVisualization;
-    currentVisualization = (LedVisualizationBase *)new TwoColorBlendingAnimated(numLeds, 2000, r1, g1, b1, r2, g2, b2);
+    currentVisualization = (LedVisualizationBase *)new TwoColorBlendingAnimated(numLeds, cycleDuration, randomStartOrder, useLinearEase, r1, g1, b1, r2, g2, b2);
     nextCheck = 0;
 }
 
