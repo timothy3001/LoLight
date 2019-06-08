@@ -33,6 +33,11 @@ void LedController::handle()
     }
 }
 
+void LedController::setBrightness(float brightness)
+{
+    this->brightnessInverted = 255 - (int)round((brightness * (float)255));
+}
+
 void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b)
 {
     logDebug("Setting solid color r: '" + String(r) + "' g: '" + String(g) + "' b: '" + String(b) + "'...");
@@ -62,7 +67,11 @@ void LedController::setPixels()
         uint8_t b = currentLedValues[i].blue;
         calculateRgbToRgbw(&r, &g, &b, &w);
 
-        RgbwColor color(r, g, b, w);
+        RgbwColor color(
+            r - brightnessInverted,
+            g - brightnessInverted,
+            b - brightnessInverted,
+            w - brightnessInverted);
         strip->SetPixelColor(i, color);
     }
     strip->Show();
@@ -88,6 +97,10 @@ void LedController::setPixelsFullSpectrum()
 
 void LedController::calculateRgbToRgbw(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *w)
 {
+    *r = ((int)*r - this->brightnessInverted) < 0 ? 0 : *r - this->brightnessInverted;
+    *g = ((int)*g - this->brightnessInverted) < 0 ? 0 : *g - this->brightnessInverted;
+    *b = ((int)*b - this->brightnessInverted) < 0 ? 0 : *b - this->brightnessInverted;
+
     int whitePart = 255;
     if (*r < whitePart)
         whitePart = *r;

@@ -15,6 +15,7 @@ private:
     LedController *ledController;
     WebServer *webServer;
 
+    void handleSetBrightness();
     void handleRoot();
     void handleSetSolidColor();
     void handleFire();

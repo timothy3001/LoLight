@@ -7,6 +7,7 @@ HaloghtServer::HaloghtServer(LedController *ledController)
 
     webServer->on("/", [&]() -> void { this->handleRoot(); });
     webServer->on("/setSolidColor", HTTP_POST, [&]() -> void { this->handleSetSolidColor(); });
+    webServer->on("/setBrightness", HTTP_POST, [&]() -> void { this->handleSetBrightness(); });
     webServer->on("/sendFire", HTTP_POST, [&]() -> void { this->handleFire(); });
     webServer->on("/sendWater", HTTP_POST, [&]() -> void { this->handleWater(); });
     webServer->on("/update", HTTP_POST, [&]() -> void { this->handleUpdate(); }, [&]() -> void { this->handleUpdateUpload(); });
@@ -32,6 +33,22 @@ void HaloghtServer::handleRoot()
     logDebug("Root called!");
 
     webServer->send(200, "text/html", pageHaloghtServerRoot);
+}
+
+void HaloghtServer::handleSetBrightness()
+{
+    logDebug("SetBrightness called!");
+
+    String brightnessString = webServer->arg("brightness");
+    if (!brightnessString || brightnessString.length() == 0)
+    {
+        webServer->send(400, "text/plain", "No brightness or invalid brightness submitted!");
+    }
+    else
+    {
+        ledController->setBrightness(brightnessString.toFloat());
+        webServer->send(200, "text/plain", "OK");
+    }
 }
 
 void HaloghtServer::handleSetSolidColor()
@@ -60,7 +77,7 @@ void HaloghtServer::handleFire()
 {
     logDebug("SendFire called!");
 
-    ledController->setTwoColorBlendingAnimated(255, 23, 23, 255, 238, 23);
+    ledController->setTwoColorBlendingAnimated(1700, true, false, 255, 23, 23, 255, 238, 23);
     webServer->send(200, "text/plain", "OK");
 }
 
@@ -68,7 +85,7 @@ void HaloghtServer::handleWater()
 {
     logDebug("SendWater called!");
 
-    ledController->setTwoColorBlendingAnimated(0, 73, 191, 0, 237, 255);
+    ledController->setTwoColorBlendingAnimated(5000, false, true, 0, 32, 253, 85, 242, 255);
     webServer->send(200, "text/plain", "OK");
 }
 
