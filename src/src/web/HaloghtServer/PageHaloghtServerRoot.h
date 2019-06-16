@@ -5,7 +5,7 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
 <head>
   <link
     rel="stylesheet"
-    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+    href="/bootstrap.min.css"
   />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
@@ -13,12 +13,18 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
     var sendSolidColorButton;
     var solidColorInput;
     var sendFireButton;
+    var onOffSwitch;
+    var brightnessRangeSlider;
 
     window.onload = function() {
       sendSolidColorButton = document.getElementById("sendSolidColorButton");
       sendFireButton = document.getElementById("sendFireButton");
       sendWaterButton = document.getElementById("sendWaterButton");
       solidColorInput = document.getElementById("solidColorInput");
+      onOffSwitch = document.getElementById("onOffSwitch");
+      brightnessRangeSlider = document.getElementById("brightnessRangeSlider");
+
+      updateState();
 
       sendSolidColorButton.addEventListener("click", () => {
         sendPost("/setSolidColor", "color=" + solidColorInput.value);
@@ -31,6 +37,17 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
       sendWaterButton.addEventListener("click", () => {
         sendPost("/sendWater", "");
       });
+
+      onOffSwitch.addEventListener("change", () => {
+        sendPost("/onOffState", "on=" + onOffSwitch.checked);
+      });
+
+      brightnessRangeSlider.addEventListener("change", () => {
+        sendPost(
+          "/setBrightness",
+          "brightness=" + brightnessRangeSlider.value / 100
+        );
+      });
     };
 
     function sendPost(url, data) {
@@ -38,6 +55,21 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
       req.open("POST", url, true);
       req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
       req.send(data);
+    }
+
+    function updateState() {
+      var xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function() {
+        if (this.readyState == 4 && this.status == 200) {
+          data = JSON.parse(xhttp.responseText);
+          brightness = Math.round(data.brightness * 100);
+
+          onOffSwitch.checked = data.turnedOn;
+          brightnessRangeSlider.value = brightness;
+        }
+      };
+      xhttp.open("GET", "/state", true);
+      xhttp.send();
     }
   </script>
   <style>
@@ -61,13 +93,100 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
       background-size: contain;
       background-origin: content-box;
     }
+    /* Switch button styles */
+    /* The switch - the box around the slider */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 60px;
+      height: 34px;
+    }
+
+    /* Hide default HTML checkbox */
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    /* The slider */
+    .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: #ccc;
+      -webkit-transition: 0.4s;
+      transition: 0.4s;
+    }
+
+    .slider:before {
+      position: absolute;
+      content: "";
+      height: 26px;
+      width: 26px;
+      left: 4px;
+      bottom: 4px;
+      background-color: white;
+      -webkit-transition: 0.4s;
+      transition: 0.4s;
+    }
+
+    input:checked + .slider {
+      background-color: #2196f3;
+    }
+
+    input:focus + .slider {
+      box-shadow: 0 0 1px #2196f3;
+    }
+
+    input:checked + .slider:before {
+      -webkit-transform: translateX(26px);
+      -ms-transform: translateX(26px);
+      transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+      border-radius: 34px;
+    }
+
+    .slider.round:before {
+      border-radius: 50%;
+    }
   </style>
 </head>
 
 <body>
   <div class="container">
     <div class="page-header mt-4">
-      <h1>Haloght</h1>
+      <div class="row">
+        <div class="col-sm-6">
+          <h1>Haloght</h1>
+        </div>
+        <div class="col-sm-6">
+          <div class="row">
+            <div class="col-2">
+              <label class="switch float-sm-right mt-3">
+                <input type="checkbox" id="onOffSwitch" />
+                <span class="slider round"></span>
+              </label>
+            </div>
+            <div class="col-10">
+              <input
+                type="range"
+                class="custom-range float-sm-right ml-3 mt-4"
+                min="0"
+                max="100"
+                step="1"
+                id="brightnessRangeSlider"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
       <hr />
     </div>
     <div class="row">

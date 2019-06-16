@@ -131,11 +131,18 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
 
     WiFi.mode(WIFI_AP);
     WiFi.disconnect();
+
+    IPAddress ip(178, 168, 244, 1);
+    IPAddress nmask(255, 255, 255, 0);
+    WiFi.softAPConfig(ip, ip, nmask);
     WiFi.softAP(apName.c_str(), "");
+
     logDebug("Access point created! Creating web server...");
 
     server = new WebServer(80);
     dnsServer = new DNSServer();
+
+    dnsServer->start(53, "*", ip);
 
     server->on("/", handleRoot);
     server->on("/config", HTTP_POST, handlePostConfiguration);
@@ -144,12 +151,10 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
 
     server->begin();
 
-    dnsServer->start(53, "*", WiFi.localIP());
-
     while (!doRestart)
     {
+        dnsServer->processNextRequest();
         server->handleClient();
-        delay(1);
     }
 
     logDebug("ESP about to restart...");

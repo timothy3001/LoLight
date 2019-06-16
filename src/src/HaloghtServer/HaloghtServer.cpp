@@ -6,6 +6,8 @@ HaloghtServer::HaloghtServer(LedController *ledController)
     this->webServer = new WebServer(80);
 
     webServer->on("/", [&]() -> void { this->handleRoot(); });
+    webServer->on("/state", HTTP_GET, [&]() -> void { this->handleGetState(); });
+    webServer->on("/onOffState", HTTP_POST, [&]() -> void { this->handleOnOffSwitch(); });
     webServer->on("/setSolidColor", HTTP_POST, [&]() -> void { this->handleSetSolidColor(); });
     webServer->on("/setBrightness", HTTP_POST, [&]() -> void { this->handleSetBrightness(); });
     webServer->on("/sendFire", HTTP_POST, [&]() -> void { this->handleFire(); });
@@ -47,6 +49,28 @@ void HaloghtServer::handleSetBrightness()
     else
     {
         ledController->setBrightness(brightnessString.toFloat());
+        webServer->send(200, "text/plain", "OK");
+    }
+}
+
+void HaloghtServer::handleOnOffSwitch()
+{
+    logDebug("OnOff called!");
+
+    String onOffStateString = webServer->arg("on");
+    if (!onOffStateString || onOffStateString.length() == 0)
+    {
+        webServer->send(400, "text/plain", "No state or invalid state sent!");
+    }
+    else
+    {
+        onOffStateString.toLowerCase();
+
+        if (onOffStateString.equals("true"))
+            ledController->setOnOff(true);
+        else
+            ledController->setOnOff(false);
+
         webServer->send(200, "text/plain", "OK");
     }
 }
@@ -131,6 +155,18 @@ void HaloghtServer::handleUpdateUpload()
             Update.printError(Serial);
         }
     }
+}
+
+void HaloghtServer::handleGetState()
+{
+    logDebug("GetState called!");
+
+    String stateString = String("{\n");
+    stateString += String("\t\"turnedOn\":") + String(ledController->isTurnedOn()) + String(",\n");
+    stateString += String("\t\"brightness\":") + String(ledController->getBrightness()) + String("\n");
+    stateString += String("}");
+
+    webServer->send(200, "application/json", stateString);
 }
 
 void HaloghtServer::extractColorFromString(String str, uint8_t *r, uint8_t *g, uint8_t *b)

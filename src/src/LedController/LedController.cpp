@@ -33,13 +33,40 @@ void LedController::handle()
     }
 }
 
+void LedController::setOnOff(bool on)
+{
+    turnedOn = on;
+
+    if (!on)
+        currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, 0, 0, 0);
+    else
+        setDefault();
+}
+
+bool LedController::isTurnedOn()
+{
+    return turnedOn;
+}
+
+void LedController::setDefault()
+{
+    turnedOn = true;
+    currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, 210, 160, 80);
+}
+
 void LedController::setBrightness(float brightness)
 {
     this->brightnessInverted = 255 - (int)round((brightness * (float)255));
 }
 
+float LedController::getBrightness()
+{
+    return ((255 - this->brightnessInverted) / (float)255);
+}
+
 void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b)
 {
+    turnedOn = true;
     logDebug("Setting solid color r: '" + String(r) + "' g: '" + String(g) + "' b: '" + String(b) + "'...");
 
     if (currentVisualization)
@@ -50,6 +77,7 @@ void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b)
 
 void LedController::setTwoColorBlendingAnimated(int cycleDuration, bool randomStartOrder, bool useLinearEase, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2)
 {
+    turnedOn = true;
     logDebug("Setting two color blending r1: '" + String(r1) + "' g1: '" + String(g1) + "' b1: '" + String(b1) + "' r2: '" + String(r2) + "' g2: '" + String(g2) + "' b2: '" + String(b2) + "'...");
     if (currentVisualization)
         delete currentVisualization;
@@ -67,11 +95,7 @@ void LedController::setPixels()
         uint8_t b = currentLedValues[i].blue;
         calculateRgbToRgbw(&r, &g, &b, &w);
 
-        RgbwColor color(
-            r - brightnessInverted,
-            g - brightnessInverted,
-            b - brightnessInverted,
-            w - brightnessInverted);
+        RgbwColor color(r, g, b, w);
         strip->SetPixelColor(i, color);
     }
     strip->Show();
@@ -88,7 +112,7 @@ void LedController::setPixelsFullSpectrum()
         uint8_t b = currentLedValues[i].blue;
         calculateRgbToRgbw(&r, &g, &b, &w);
 
-        RgbwColor color(r + w, g + w, b + w, w);
+        RgbwColor color(r, g, b, w);
         strip->SetPixelColor(i, color);
     }
 

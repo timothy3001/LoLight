@@ -15,10 +15,14 @@ public:
     ~LedController();
     void handle();
 
+    void setDefault();
     void setSolidColor(uint8_t r, uint8_t g, uint8_t b);
     void setTwoColorBlendingAnimated(int cycleDuration, bool randomStartOrder, bool useLinearEase, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2);
+    void setOnOff(bool on);
 
     void setBrightness(float brightness);
+    float getBrightness();
+    bool isTurnedOn();
 
 private:
     static const uint8_t gamma8Correction[];
@@ -26,6 +30,7 @@ private:
     int numLeds;
     int dataPin;
     int brightnessInverted = 0;
+    bool turnedOn = false;
 
     LedVisualizationBase *currentVisualization = NULL;
     ulong nextCheck = 0;

@@ -20,6 +20,8 @@ private:
     void handleSetSolidColor();
     void handleFire();
     void handleWater();
+    void handleOnOffSwitch();
+    void handleGetState();
 
     void handleUpdate();
     void handleUpdateUpload();
