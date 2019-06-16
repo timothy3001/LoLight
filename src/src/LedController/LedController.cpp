@@ -38,7 +38,11 @@ void LedController::setOnOff(bool on)
     turnedOn = on;
 
     if (!on)
+    {
         currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, 0, 0, 0);
+        nextCheck = 0;
+        handle();
+    }
     else
         setDefault();
 }
@@ -51,12 +55,16 @@ bool LedController::isTurnedOn()
 void LedController::setDefault()
 {
     turnedOn = true;
-    currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, 210, 160, 80);
+    currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, 220, 170, 90);
+    nextCheck = 0;
+    handle();
 }
 
 void LedController::setBrightness(float brightness)
 {
     this->brightnessInverted = 255 - (int)round((brightness * (float)255));
+    nextCheck = 0;
+    handle();
 }
 
 float LedController::getBrightness()
@@ -73,6 +81,7 @@ void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b)
         delete currentVisualization;
     currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, r, g, b);
     nextCheck = 0;
+    handle();
 }
 
 void LedController::setTwoColorBlendingAnimated(int cycleDuration, bool randomStartOrder, bool useLinearEase, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2)
@@ -83,6 +92,7 @@ void LedController::setTwoColorBlendingAnimated(int cycleDuration, bool randomSt
         delete currentVisualization;
     currentVisualization = (LedVisualizationBase *)new TwoColorBlendingAnimated(numLeds, cycleDuration, randomStartOrder, useLinearEase, r1, g1, b1, r2, g2, b2);
     nextCheck = 0;
+    handle();
 }
 
 void LedController::setPixels()

@@ -1,6 +1,7 @@
 #include <Arduino.h>
 
 const char pageHaloghtServerRoot[] PROGMEM = R"=====(
+
 <!DOCTYPE html>
 <head>
   <link
@@ -177,12 +178,13 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
             <div class="col-10">
               <input
                 type="range"
-                class="custom-range float-sm-right ml-3 mt-4"
-                min="0"
+                class="custom-range float-sm-right ml-3 mt-4 pr-3"
+                min="40"
                 max="100"
                 step="1"
                 id="brightnessRangeSlider"
-                value="0"
+                value="40"
+                style="width: 90%;"
               />
             </div>
           </div>
@@ -281,5 +283,6 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
     </div>
   </div>
 </body>
+
 
 )=====";

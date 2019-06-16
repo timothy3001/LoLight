@@ -8,7 +8,7 @@ void WebServerExtensions::registerLargeFileEndpoint(String endPointName, String 
                 return 0;
 
             int endPosition = index + (maxLen - 1) < fileSize ? index + (maxLen - 1) : fileSize - 1;
-            int currentChunkSize = endPosition - maxLen + 1;
+            int currentChunkSize = endPosition - index + 1;
 
             for (int i = 0; i < currentChunkSize; i++)
             {
@@ -17,7 +17,7 @@ void WebServerExtensions::registerLargeFileEndpoint(String endPointName, String 
 
             return currentChunkSize;
         });
-        response->addHeader("Server", "Haloght");
+
         request->send(response);
     });
 }
