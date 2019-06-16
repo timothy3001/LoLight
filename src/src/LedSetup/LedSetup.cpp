@@ -4,7 +4,7 @@ const char *LedSetup::PREFERENCES_LEDSETUP = "Led-Setup";
 const char *LedSetup::SETTING_LED_AMOUNT = "ledAmount";
 const char *LedSetup::SETTING_DATA_PIN = "dataPin";
 
-WebServer *LedSetup::webServer = NULL;
+AsyncWebServer *LedSetup::webServer = NULL;
 int LedSetup::numLeds = -1;
 int LedSetup::dataPin = -1;
 bool LedSetup::doRestart = false;
@@ -29,7 +29,7 @@ void LedSetup::loadConfiguration()
 void LedSetup::setup()
 {
     logDebug("Starting WebServer for LED setup...");
-    webServer = new WebServer(80);
+    webServer = new AsyncWebServer(80);
 
     webServer->on("/", handleRoot);
     webServer->on("/config", HTTP_POST, handlePostConfiguration);
@@ -39,7 +39,6 @@ void LedSetup::setup()
 
     while (!doRestart)
     {
-        webServer->handleClient();
         delay(1);
     }
 
@@ -47,7 +46,6 @@ void LedSetup::setup()
     unsigned long tsWaitForRestart = millis();
     while (tsWaitForRestart + 10000 > millis())
     {
-        webServer->handleClient();
         delay(1);
     }
 
@@ -69,20 +67,20 @@ bool LedSetup::isConfigurationValid()
     return configurationValid;
 }
 
-void LedSetup::handleRoot()
+void LedSetup::handleRoot(AsyncWebServerRequest *request)
 {
     logDebug("WebServer: Root called!");
-    webServer->send(200, "text/html", pageLedSetupServerRoot);
+    request->send(200, "text/html", pageLedSetupServerRoot);
 }
 
-void LedSetup::handlePostConfiguration()
+void LedSetup::handlePostConfiguration(AsyncWebServerRequest *request)
 {
     logDebug("WebServer: Post configuration called!");
 
-    if (!validateAndReadSettings(webServer, &dataPin, &numLeds))
+    if (!validateAndReadSettings(request, &dataPin, &numLeds))
     {
         logDebug("Invalid parameters!");
-        webServer->send(400, "text/html", pageLedSetupServerInvalidSettings);
+        request->send(400, "text/html", pageLedSetupServerInvalidSettings);
     }
     else
     {
@@ -95,15 +93,15 @@ void LedSetup::handlePostConfiguration()
 
         preferences.end();
 
-        webServer->send(200, "text/html", pageLedSetupServerOk);
+        request->send(200, "text/html", pageLedSetupServerOk);
         doRestart = true;
     }
 }
 
-bool LedSetup::validateAndReadSettings(WebServer *server, int *postDataPin, int *postNumLeds)
+bool LedSetup::validateAndReadSettings(AsyncWebServerRequest *request, int *postDataPin, int *postNumLeds)
 {
-    String dataPinString = webServer->arg("dataPin");
-    String numLedsString = webServer->arg("numLeds");
+    String dataPinString = request->hasArg("dataPin") ? request->arg("dataPin") : String("");
+    String numLedsString = request->hasArg("numLeds") ? request->arg("numLeds") : String("");
 
     if (dataPinString.length() != 0 && numLedsString.length() != 0)
     {

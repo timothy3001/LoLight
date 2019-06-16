@@ -1,6 +1,6 @@
 #include "WiFiSetup.h"
 
-WebServer *WiFiSetup::server = NULL;
+AsyncWebServer *WiFiSetup::server = NULL;
 DNSServer *WiFiSetup::dnsServer = NULL;
 const char *WiFiSetup::PREFERENCES_WIFI = "WiFi-Setup";
 const char *WiFiSetup::SETTING_SSID = "ssid";
@@ -139,7 +139,7 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
 
     logDebug("Access point created! Creating web server...");
 
-    server = new WebServer(80);
+    server = new AsyncWebServer(80);
     dnsServer = new DNSServer();
 
     dnsServer->start(53, "*", ip);
@@ -154,14 +154,12 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
     while (!doRestart)
     {
         dnsServer->processNextRequest();
-        server->handleClient();
     }
 
     logDebug("ESP about to restart...");
     unsigned long tsWaitForRestart = millis();
     while (tsWaitForRestart + 10000 > millis())
     {
-        server->handleClient();
         dnsServer->processNextRequest();
         delay(1);
     }
@@ -169,25 +167,25 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
     ESP.restart();
 }
 
-void WiFiSetup::handleRoot()
+void WiFiSetup::handleRoot(AsyncWebServerRequest *request)
 {
     logDebug("WebServer: Root called");
-    server->send_P(200, "text/html", pageWiFiSetupServerRoot);
+    request->send_P(200, "text/html", pageWiFiSetupServerRoot);
 }
 
-void WiFiSetup::handlePostConfiguration()
+void WiFiSetup::handlePostConfiguration(AsyncWebServerRequest *request)
 {
     logDebug("WebServer: New configuration posted!");
 
-    String ssid = server->arg("ssid");
-    String password = server->arg("password");
-
-    if (ssid.length() == 0)
+    if (!request->hasArg("ssid") || request->arg("ssid").length() == 0)
     {
-        server->send(400, "text/html", pageWiFiSetupServerWrongSsid);
+        request->send(400, "text/html", pageWiFiSetupServerWrongSsid);
     }
     else
     {
+        String ssid = request->arg("ssid");
+        String password = request->hasArg("password") ? request->arg("password") : String("");
+
         Preferences preferences;
         preferences.begin(PREFERENCES_WIFI, false);
 
@@ -196,7 +194,7 @@ void WiFiSetup::handlePostConfiguration()
 
         preferences.end();
 
-        server->send(200, "text/html", pageWiFiSetupServerOk);
+        request->send(200, "text/html", pageWiFiSetupServerOk);
         doRestart = true;
     }
 }

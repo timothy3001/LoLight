@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 #include <WiFi.h>
-#include <WebServer.h>
+#include <ESPAsyncWebServer.h>
 #include <Preferences.h>
 #include <esp_system.h>
 #include <DNSServer.h>
@@ -32,12 +32,12 @@ private:
   static bool readWifiSettings(char *&ssid, char *&password);
   static void WiFiEventHandler(WiFiEvent_t event, system_event_info_t info);
 
-  static void handleRoot();
-  static void handlePostConfiguration();
+  static void handleRoot(AsyncWebServerRequest *request);
+  static void handlePostConfiguration(AsyncWebServerRequest *request);
 
   static String getHostname();
 
-  static WebServer *server;
+  static AsyncWebServer *server;
   static DNSServer *dnsServer;
 };
 

@@ -3,20 +3,22 @@
 HaloghtServer::HaloghtServer(LedController *ledController)
 {
     this->ledController = ledController;
-    this->webServer = new WebServer(80);
+    this->webServer = new AsyncWebServer(80);
 
-    webServer->on("/", [&]() -> void { this->handleRoot(); });
-    webServer->on("/state", HTTP_GET, [&]() -> void { this->handleGetState(); });
-    webServer->on("/onOffState", HTTP_POST, [&]() -> void { this->handleOnOffSwitch(); });
-    webServer->on("/setSolidColor", HTTP_POST, [&]() -> void { this->handleSetSolidColor(); });
-    webServer->on("/setBrightness", HTTP_POST, [&]() -> void { this->handleSetBrightness(); });
-    webServer->on("/sendFire", HTTP_POST, [&]() -> void { this->handleFire(); });
-    webServer->on("/sendWater", HTTP_POST, [&]() -> void { this->handleWater(); });
-    webServer->on("/update", HTTP_POST, [&]() -> void { this->handleUpdate(); }, [&]() -> void { this->handleUpdateUpload(); });
+    webServer->on("/", [&](AsyncWebServerRequest *request) -> void { this->handleRoot(request); });
+    webServer->on("/state", HTTP_GET, [&](AsyncWebServerRequest *request) -> void { this->handleGetState(request); });
+    webServer->on("/onOffState", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleOnOffSwitch(request); });
+    webServer->on("/setSolidColor", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleSetSolidColor(request); });
+    webServer->on("/setBrightness", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleSetBrightness(request); });
+    webServer->on("/sendFire", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleFire(request); });
+    webServer->on("/sendWater", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleWater(request); });
+    webServer->onFileUpload([&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) -> void { this->handleUpdate(request, filename, index, data, len, final); });
     WebServerExtensions::registerBootstrap(*webServer);
     WebServerExtensions::registerNotFound(*webServer);
 
     webServer->begin();
+
+    setupOTA();
 }
 
 HaloghtServer::~HaloghtServer()
@@ -25,45 +27,88 @@ HaloghtServer::~HaloghtServer()
         delete webServer;
 }
 
-void HaloghtServer::handleClient()
+void HaloghtServer::setupOTA()
 {
-    webServer->handleClient();
+    ArduinoOTA.onStart([&]() {
+        String type;
+        if (ArduinoOTA.getCommand() == U_FLASH)
+        {
+            type = "sketch";
+        }
+        else
+        { // U_FS
+            type = "filesystem";
+        }
+
+        logDebug(String("Start updating ") + String(type));
+    });
+    ArduinoOTA.onEnd([&]() {
+        logDebug("\nEnd");
+    });
+    ArduinoOTA.onProgress([&](unsigned int progress, unsigned int total) {
+        logDebug(String("Progress: ") + String(round(progress / (total / (float)100))) + String("%"));
+    });
+    ArduinoOTA.onError([&](ota_error_t error) {
+        logDebug(String("Error[") + String(error) + String("]: "));
+        if (error == OTA_AUTH_ERROR)
+        {
+            logDebug("Auth Failed");
+        }
+        else if (error == OTA_BEGIN_ERROR)
+        {
+            logDebug("Begin Failed");
+        }
+        else if (error == OTA_CONNECT_ERROR)
+        {
+            logDebug("Connect Failed");
+        }
+        else if (error == OTA_RECEIVE_ERROR)
+        {
+            logDebug("Receive Failed");
+        }
+        else if (error == OTA_END_ERROR)
+        {
+            logDebug("End Failed");
+        }
+    });
+    ArduinoOTA.begin();
 }
 
-void HaloghtServer::handleRoot()
+void HaloghtServer::handleRoot(AsyncWebServerRequest *request)
 {
     logDebug("Root called!");
 
-    webServer->send(200, "text/html", pageHaloghtServerRoot);
+    request->send(200, "text/html", pageHaloghtServerRoot);
 }
 
-void HaloghtServer::handleSetBrightness()
+void HaloghtServer::handleSetBrightness(AsyncWebServerRequest *request)
 {
     logDebug("SetBrightness called!");
 
-    String brightnessString = webServer->arg("brightness");
-    if (!brightnessString || brightnessString.length() == 0)
+    if (!request->hasArg("brightness") || request->arg("brightness").length() == 0)
     {
-        webServer->send(400, "text/plain", "No brightness or invalid brightness submitted!");
+        request->send(400, "text/plain", "No brightness or invalid brightness submitted!");
     }
     else
     {
+        String brightnessString = request->arg("brightness");
         ledController->setBrightness(brightnessString.toFloat());
-        webServer->send(200, "text/plain", "OK");
+        request->send(200, "text/plain", "OK");
     }
 }
 
-void HaloghtServer::handleOnOffSwitch()
+void HaloghtServer::handleOnOffSwitch(AsyncWebServerRequest *request)
 {
     logDebug("OnOff called!");
 
-    String onOffStateString = webServer->arg("on");
-    if (!onOffStateString || onOffStateString.length() == 0)
+    if (!request->hasArg("on") || request->arg("on").length() == 0)
     {
-        webServer->send(400, "text/plain", "No state or invalid state sent!");
+        request->send(400, "text/plain", "No state or invalid state sent!");
     }
     else
     {
+        String onOffStateString = request->arg("on");
+
         onOffStateString.toLowerCase();
 
         if (onOffStateString.equals("true"))
@@ -71,83 +116,72 @@ void HaloghtServer::handleOnOffSwitch()
         else
             ledController->setOnOff(false);
 
-        webServer->send(200, "text/plain", "OK");
+        request->send(200, "text/plain", "OK");
     }
 }
 
-void HaloghtServer::handleSetSolidColor()
+void HaloghtServer::handleSetSolidColor(AsyncWebServerRequest *request)
 {
     logDebug("SetSolidColor called!");
 
-    String colorString = webServer->arg("color");
-    if (colorString && colorString.length() == 7)
+    if (request->hasArg("color") && request->arg("color").length() == 7)
     {
         uint8_t red;
         uint8_t green;
         uint8_t blue;
 
-        extractColorFromString(colorString, &red, &green, &blue);
+        extractColorFromString(request->arg("color"), &red, &green, &blue);
 
         ledController->setSolidColor(red, green, blue);
-        webServer->send(200, "text/plain", "OK");
+        request->send(200, "text/plain", "OK");
     }
     else
     {
-        webServer->send(400, "text/plain", "Wrong Format!");
+        request->send(400, "text/plain", "Wrong Format!");
     }
 }
 
-void HaloghtServer::handleFire()
+void HaloghtServer::handleFire(AsyncWebServerRequest *request)
 {
     logDebug("SendFire called!");
 
     ledController->setTwoColorBlendingAnimated(1700, true, false, 255, 23, 23, 255, 238, 23);
-    webServer->send(200, "text/plain", "OK");
+    request->send(200, "text/plain", "OK");
 }
 
-void HaloghtServer::handleWater()
+void HaloghtServer::handleWater(AsyncWebServerRequest *request)
 {
     logDebug("SendWater called!");
 
     ledController->setTwoColorBlendingAnimated(5000, false, true, 0, 32, 253, 85, 242, 255);
-    webServer->send(200, "text/plain", "OK");
+    request->send(200, "text/plain", "OK");
 }
 
-void HaloghtServer::handleUpdate()
+void HaloghtServer::handleUpdate(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final)
 {
-    logDebug("Handling update...");
-
-    webServer->sendHeader("Connection", "close");
-    webServer->send(200, "text/plain", (Update.hasError()) ? "FAIL" : "OK");
-    ESP.restart();
-}
-
-void HaloghtServer::handleUpdateUpload()
-{
-    HTTPUpload &upload = webServer->upload();
-    if (upload.status == UPLOAD_FILE_START)
+    if (!index)
     {
-        logDebug(String("Update: ") + String(upload.filename.c_str()));
+        logDebug(String("Update: ") + String(filename.c_str()));
         if (!Update.begin(UPDATE_SIZE_UNKNOWN))
         {
             // Error while flashing new software
             Update.printError(Serial);
         }
     }
-    else if (upload.status == UPLOAD_FILE_WRITE)
+    for (size_t i = 0; i < len; i++)
     {
         // Flashing process
-        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize)
+        if (Update.write(data, len) != len)
         {
             Update.printError(Serial);
         }
     }
-    else if (upload.status == UPLOAD_FILE_END)
+    if (final)
     {
         if (Update.end(true))
         {
             // Flashing finished
-            logDebug("Update Success: " + String(upload.totalSize) + String(" bytes updated!"));
+            logDebug("Update Success!");
             logDebug("Rebooting...");
         }
         else
@@ -155,9 +189,15 @@ void HaloghtServer::handleUpdateUpload()
             Update.printError(Serial);
         }
     }
+
+    AsyncWebServerResponse *response = request->beginResponse(200); //Sends 404 File Not Found
+    response->addHeader("Connection", "close");
+    request->send(response);
+
+    ESP.restart();
 }
 
-void HaloghtServer::handleGetState()
+void HaloghtServer::handleGetState(AsyncWebServerRequest *request)
 {
     logDebug("GetState called!");
 
@@ -166,7 +206,7 @@ void HaloghtServer::handleGetState()
     stateString += String("\t\"brightness\":") + String(ledController->getBrightness()) + String("\n");
     stateString += String("}");
 
-    webServer->send(200, "application/json", stateString);
+    request->send(200, "application/json", stateString);
 }
 
 void HaloghtServer::extractColorFromString(String str, uint8_t *r, uint8_t *g, uint8_t *b)
@@ -188,6 +228,11 @@ void HaloghtServer::extractColorFromString(String str, uint8_t *r, uint8_t *g, u
     *r = strtol(redPart, NULL, 16);
     *g = strtol(greenPart, NULL, 16);
     *b = strtol(bluePart, NULL, 16);
+}
+
+void handle()
+{
+    ArduinoOTA.handle();
 }
 
 void HaloghtServer::logDebug(String message)

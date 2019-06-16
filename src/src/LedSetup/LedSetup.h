@@ -3,7 +3,7 @@
 
 #include <Arduino.h>
 
-#include <WebServer.h>
+#include <ESPAsyncWebServer.h>
 #include <Preferences.h>
 #include <esp_system.h>
 
@@ -24,9 +24,9 @@ public:
 private:
   static void logDebug(String message);
 
-  static void handleRoot();
-  static void handlePostConfiguration();
-  static bool validateAndReadSettings(WebServer *server, int *dataPin, int *numLeds);
+  static void handleRoot(AsyncWebServerRequest *request);
+  static void handlePostConfiguration(AsyncWebServerRequest *request);
+  static bool validateAndReadSettings(AsyncWebServerRequest *request, int *dataPin, int *numLeds);
 
   static int numLeds;
   static int dataPin;
@@ -37,7 +37,7 @@ private:
   static const char *SETTING_LED_AMOUNT;
   static const char *SETTING_DATA_PIN;
 
-  static WebServer *webServer;
+  static AsyncWebServer *webServer;
 };
 
 #endif

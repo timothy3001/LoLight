@@ -1,43 +1,35 @@
 #include "WebServerExtensions.h"
 
-void WebServerExtensions::registerLargeFileEndpoint(String endPointName, String contentType, WebServer &server, const byte *file, int fileSize)
+void WebServerExtensions::registerLargeFileEndpoint(String endPointName, String contentType, AsyncWebServer &server, const byte *file, int fileSize)
 {
-    server.on(endPointName, [endPointName, contentType, &server, file, fileSize]() {
-        int chunkSize = 1500;
-        int currentPosition = 0;
+    server.on(endPointName.c_str(), HTTP_GET, [endPointName, contentType, file, fileSize](AsyncWebServerRequest *request) {
+        AsyncWebServerResponse *response = request->beginChunkedResponse(contentType, [file, fileSize](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
+            if (index >= fileSize)
+                return 0;
 
-        server.setContentLength(CONTENT_LENGTH_UNKNOWN);
+            int endPosition = index + (maxLen - 1) < fileSize ? index + (maxLen - 1) : fileSize - 1;
+            int currentChunkSize = endPosition - maxLen + 1;
 
-        server.send(200, contentType, "");
-        Serial.println("\n\n\n");
-        while (currentPosition < fileSize)
-        {
-            int endPosition = currentPosition + (chunkSize - 1) < fileSize ? currentPosition + (chunkSize - 1) : fileSize - 1;
-            int currentChunkSize = endPosition - currentPosition + 1;
-
-            byte *currentChunk = new byte[currentChunkSize + 1];
             for (int i = 0; i < currentChunkSize; i++)
             {
-                currentChunk[i] = file[currentPosition + i];
+                buffer[i] = file[index + i];
             }
-            currentChunk[currentChunkSize] = 0;
 
-            server.sendContent((char *)currentChunk);
-
-            delete currentChunk;
-            currentPosition = endPosition + 1;
-        }
-
-        Serial.println("\n");
+            return currentChunkSize;
+        });
+        response->addHeader("Server", "Haloght");
+        request->send(response);
     });
 }
 
-void WebServerExtensions::registerBootstrap(WebServer &server)
+void WebServerExtensions::registerBootstrap(AsyncWebServer &server)
 {
     registerLargeFileEndpoint("/bootstrap.min.css", "text/css; charset=utf-8", server, bootstrapMinCss, sizeof(bootstrapMinCss) / sizeof(byte));
 }
 
-void WebServerExtensions::registerNotFound(WebServer &server)
+void WebServerExtensions::registerNotFound(AsyncWebServer &server)
 {
-    server.send(404, "text/plain", "Not found!");
+    server.onNotFound([](AsyncWebServerRequest *request) -> void {
+        request->send(404, "text/plain", "Not found!");
+    });
 }
