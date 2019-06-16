@@ -17,61 +17,12 @@ HaloghtServer::HaloghtServer(LedController *ledController)
     WebServerExtensions::registerNotFound(*webServer);
 
     webServer->begin();
-
-    setupOTA();
 }
 
 HaloghtServer::~HaloghtServer()
 {
     if (webServer)
         delete webServer;
-}
-
-void HaloghtServer::setupOTA()
-{
-    ArduinoOTA.onStart([&]() {
-        String type;
-        if (ArduinoOTA.getCommand() == U_FLASH)
-        {
-            type = "sketch";
-        }
-        else
-        { // U_FS
-            type = "filesystem";
-        }
-
-        logDebug(String("Start updating ") + String(type));
-    });
-    ArduinoOTA.onEnd([&]() {
-        logDebug("\nEnd");
-    });
-    ArduinoOTA.onProgress([&](unsigned int progress, unsigned int total) {
-        logDebug(String("Progress: ") + String(round(progress / (total / (float)100))) + String("%"));
-    });
-    ArduinoOTA.onError([&](ota_error_t error) {
-        logDebug(String("Error[") + String(error) + String("]: "));
-        if (error == OTA_AUTH_ERROR)
-        {
-            logDebug("Auth Failed");
-        }
-        else if (error == OTA_BEGIN_ERROR)
-        {
-            logDebug("Begin Failed");
-        }
-        else if (error == OTA_CONNECT_ERROR)
-        {
-            logDebug("Connect Failed");
-        }
-        else if (error == OTA_RECEIVE_ERROR)
-        {
-            logDebug("Receive Failed");
-        }
-        else if (error == OTA_END_ERROR)
-        {
-            logDebug("End Failed");
-        }
-    });
-    ArduinoOTA.begin();
 }
 
 void HaloghtServer::handleRoot(AsyncWebServerRequest *request)
@@ -168,14 +119,14 @@ void HaloghtServer::handleUpdate(AsyncWebServerRequest *request, String filename
             Update.printError(Serial);
         }
     }
-    for (size_t i = 0; i < len; i++)
+
+    // Flashing process
+    // logDebug(String("Flashing ") + String(len) + String(" bytes..."));
+    if (Update.write(data, len) != len)
     {
-        // Flashing process
-        if (Update.write(data, len) != len)
-        {
-            Update.printError(Serial);
-        }
+        Update.printError(Serial);
     }
+
     if (final)
     {
         if (Update.end(true))
@@ -183,18 +134,20 @@ void HaloghtServer::handleUpdate(AsyncWebServerRequest *request, String filename
             // Flashing finished
             logDebug("Update Success!");
             logDebug("Rebooting...");
+
+            AsyncWebServerResponse *response = request->beginResponse(200);
+            response->addHeader("Connection", "close");
+            request->send(response);
+
+            delay(200);
+
+            ESP.restart();
         }
         else
         {
             Update.printError(Serial);
         }
     }
-
-    AsyncWebServerResponse *response = request->beginResponse(200); //Sends 404 File Not Found
-    response->addHeader("Connection", "close");
-    request->send(response);
-
-    ESP.restart();
 }
 
 void HaloghtServer::handleGetState(AsyncWebServerRequest *request)
@@ -228,11 +181,6 @@ void HaloghtServer::extractColorFromString(String str, uint8_t *r, uint8_t *g, u
     *r = strtol(redPart, NULL, 16);
     *g = strtol(greenPart, NULL, 16);
     *b = strtol(bluePart, NULL, 16);
-}
-
-void handle()
-{
-    ArduinoOTA.handle();
 }
 
 void HaloghtServer::logDebug(String message)

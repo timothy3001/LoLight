@@ -15,8 +15,6 @@ private:
     LedController *ledController;
     AsyncWebServer *webServer;
 
-    void setupOTA();
-
     void handleSetBrightness(AsyncWebServerRequest *request);
     void handleRoot(AsyncWebServerRequest *request);
     void handleSetSolidColor(AsyncWebServerRequest *request);
@@ -31,12 +29,9 @@ private:
     void extractColorFromString(String str, uint8_t *r, uint8_t *g, uint8_t *b);
     void logDebug(String message);
 
-    
-
 public:
     HaloghtServer(LedController *ledController);
     ~HaloghtServer();
-    void handle();
 };
 
 #endif

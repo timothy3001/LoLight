@@ -182,6 +182,7 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
                 max="100"
                 step="1"
                 id="brightnessRangeSlider"
+                value="0"
               />
             </div>
           </div>

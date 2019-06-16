@@ -64,6 +64,5 @@ void setup()
 
 void loop()
 {
-    haloghtServer->handle();
     ledController->handle();
 }
