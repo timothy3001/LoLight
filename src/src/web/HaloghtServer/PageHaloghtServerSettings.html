@@ -1,15 +1,13 @@
 <!DOCTYPE html>
+
 <head>
-  <link
-    rel="stylesheet"
-    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
-  />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
   <script>
     var sendSolidColorButton;
 
-    window.onload = function() {
+    window.onload = function () {
       sendSolidColorButton = document.getElementById("sendSolidColorButton");
 
       sendSolidColorButton.addEventListener("click", () => {
@@ -42,42 +40,34 @@
         <form class="form-horizontal" action="/config" method="post">
           <div class="form-group">
             <label class="control-label" for="dataPin">Default color</label>
-            <input
-              type="color"
-              class="form-control"
-              id="defaultColorInput"
-              name="defaultColorInput"
-              style="height: 50px;"
-            />
+            <input type="color" class="form-control" id="defaultColorInput" name="defaultColorInput"
+              style="height: 50px;" />
           </div>
           <div class="form-group">
             <label class="control-label" for="numLeds">Hostname</label>
             <div class="row">
-              <div class="col-6 my-auto pr-0">
+              <div class="col-4 my-auto pr-0">
                 <label for="hostnameSuffix" class="float-right" style="padding-right: 0px;">Haloght -&nbsp;</label>
               </div>
-              <input
-                type="text"
-                class="form-control col-6 float-left"
-                id="hostnameSuffix"
-                name="hostnameSuffix"
-                placeholder="Suffix..."
-              />
+              <div class="col-8 pl-0">
+                <input type="text" class="form-control float-left" id="hostnameSuffix" name="hostnameSuffix"
+                  placeholder="Suffix..." />
+              </div>
             </div>
           </div>
           <div class="form-group">
-              <div class="row">
-                  <div class="col-6">
-                      <button type="submit" class="btn btn-default">Submit</button>
-                  </div>
-                  <div class="col-6">
-                      <button type="submit" class="btn btn-danger float-right">Reset</button>
-                  </div>
+            <div class="row">
+              <div class="col-6">
+                <button type="submit" class="btn btn-default">Submit</button>
+              </div>
+              <div class="col-6">
+                <button type="submit" class="btn btn-danger float-right">Reset</button>
               </div>
             </div>
           </div>
-        </form>
       </div>
+      </form>
     </div>
+  </div>
   </div>
 </body>
