@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<head>
+  <link
+    rel="stylesheet"
+    href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css"
+  />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="utf-8" />
+  <script>
+    var sendSolidColorButton;
+
+    window.onload = function() {
+      sendSolidColorButton = document.getElementById("sendSolidColorButton");
+
+      sendSolidColorButton.addEventListener("click", () => {
+        sendPost("/setSolidColor", "color=" + solidColorInput.value);
+      });
+    };
+
+    function sendPost(url, data) {
+      var req = new XMLHttpRequest();
+      req.open("POST", url, true);
+      req.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      req.send(data);
+    }
+  </script>
+  <style></style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="page-header mt-4">
+      <div class="row h-100">
+        <div class="col-sm-7">
+          <h1 class="display-3">Haloght</h1>
+        </div>
+      </div>
+      <hr />
+    </div>
+    <div class="row">
+      <div class="col-sm-8">
+        <form class="form-horizontal" action="/config" method="post">
+          <div class="form-group">
+            <label class="control-label" for="dataPin">Default color</label>
+            <input
+              type="color"
+              class="form-control"
+              id="defaultColorInput"
+              name="defaultColorInput"
+              style="height: 50px;"
+            />
+          </div>
+          <div class="form-group">
+            <label class="control-label" for="numLeds">Hostname</label>
+            <div class="row">
+              <div class="col-6 my-auto pr-0">
+                <label for="hostnameSuffix" class="float-right" style="padding-right: 0px;">Haloght -&nbsp;</label>
+              </div>
+              <input
+                type="text"
+                class="form-control col-6 float-left"
+                id="hostnameSuffix"
+                name="hostnameSuffix"
+                placeholder="Suffix..."
+              />
+            </div>
+          </div>
+          <div class="form-group">
+              <div class="row">
+                  <div class="col-6">
+                      <button type="submit" class="btn btn-default">Submit</button>
+                  </div>
+                  <div class="col-6">
+                      <button type="submit" class="btn btn-danger float-right">Reset</button>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</body>
