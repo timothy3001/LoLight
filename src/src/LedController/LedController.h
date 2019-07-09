@@ -7,11 +7,12 @@
 #include "LedVisualization/LedVisualizationBase.h"
 #include "LedVisualization/SolidColor/LedVisualizationSolidColor.h"
 #include "LedVisualization/TwoColorBlendingAnimated/TwoColorBlendingAnimated.h"
+#include "../Other/HelperFunctions.h"
 
 class LedController
 {
 public:
-    LedController(int dataPin, int numLeds);
+    LedController(int dataPin, int numLeds, String defaultColor);
     ~LedController();
     void handle();
 
@@ -29,8 +30,13 @@ private:
 
     int numLeds;
     int dataPin;
+    String defaultColor = "";
     int brightnessInverted = 0;
     bool turnedOn = false;
+
+    uint8_t defaultRed;
+    uint8_t defaultGreen;
+    uint8_t defaultBlue;
 
     LedVisualizationBase *currentVisualization = NULL;
     ulong nextCheck = 0;

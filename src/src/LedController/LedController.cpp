@@ -1,10 +1,12 @@
 #include "LedController.h"
 
-LedController::LedController(int dataPin, int numLeds)
+LedController::LedController(int dataPin, int numLeds, String defaultColor)
 {
     this->dataPin = dataPin;
     this->numLeds = numLeds;
     this->currentLedValues = new LedValue[numLeds];
+
+    HelperFunctions::extractColorFromString(defaultColor, &defaultRed, &defaultGreen, &defaultBlue);
 
     this->strip = new NeoPixelBus<NeoGrbwFeature, Neo800KbpsMethod>(this->numLeds, this->dataPin);
     strip->Begin();
@@ -55,7 +57,7 @@ bool LedController::isTurnedOn()
 void LedController::setDefault()
 {
     turnedOn = true;
-    currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, 220, 170, 90);
+    currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, defaultRed, defaultGreen, defaultBlue);
     nextCheck = 0;
     handle();
 }

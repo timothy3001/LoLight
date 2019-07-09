@@ -2,13 +2,11 @@
 
 AsyncWebServer *WiFiSetup::server = NULL;
 DNSServer *WiFiSetup::dnsServer = NULL;
-const char *WiFiSetup::PREFERENCES_WIFI = "WiFi-Setup";
-const char *WiFiSetup::SETTING_SSID = "ssid";
-const char *WiFiSetup::SETTING_PASSWORD = "password";
 char *WiFiSetup::hostnamePrefix = "WiFiSetup";
 bool WiFiSetup::doRestart = false;
+String WiFiSetup::hostnameSuffix = "";
 
-String WiFiSetup::getHostname()
+String WiFiSetup::getShortMac()
 {
     uint8_t mac[6];
     esp_read_mac(mac, ESP_MAC_WIFI_STA);
@@ -19,17 +17,23 @@ String WiFiSetup::getHostname()
         macStringLastPart += String(mac[i], HEX);
     }
 
-    String apName = String(hostnamePrefix) + String("-") + macStringLastPart;
-    return apName;
+    return macStringLastPart;
 }
 
 bool WiFiSetup::readWifiSettings(char *&ssid, char *&password)
 {
     Preferences preferences;
 
-    preferences.begin(PREFERENCES_WIFI, true);
+    preferences.begin(PREFERENCES_WIFI, false);
 
     String ssidString = preferences.getString(SETTING_SSID, String(""));
+    hostnameSuffix = preferences.getString(SETTING_HOSTNAME_SUFFIX);
+
+    if (hostnameSuffix.length() == 0)
+    {
+        hostnameSuffix = getShortMac();
+        preferences.putString(SETTING_HOSTNAME_SUFFIX, hostnameSuffix);
+    }
 
     bool result = false;
     if (ssidString.length() != 0)
@@ -57,7 +61,7 @@ void WiFiSetup::setup()
 
     bool result = readWifiSettings(ssid, password);
 
-    String hostname = getHostname();
+    String hostname = String(hostnamePrefix) + String("-") + hostnameSuffix;
 
     if (result)
     {

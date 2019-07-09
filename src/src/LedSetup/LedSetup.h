@@ -11,6 +11,7 @@
 #include "../web/LedSetup/PageLedSetupServerInvalidSettings.h"
 #include "../web/LedSetup/PageLedSetupServerOk.h"
 #include "../web/LedSetup/PageLedSetupServerRoot.h"
+#include "../Constants.h"
 
 class LedSetup
 {
@@ -19,6 +20,7 @@ public:
   static void loadConfiguration();
   static int getNumLeds();
   static int getDataPin();
+  static String &getDefaultColor();
   static bool isConfigurationValid();
 
 private:
@@ -32,10 +34,7 @@ private:
   static int dataPin;
   static bool configurationValid;
   static bool doRestart;
-
-  static const char *PREFERENCES_LEDSETUP;
-  static const char *SETTING_LED_AMOUNT;
-  static const char *SETTING_DATA_PIN;
+  static String defaultColor;
 
   static AsyncWebServer *webServer;
 };

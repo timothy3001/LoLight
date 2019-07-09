@@ -1,18 +1,28 @@
 #include "HaloghtServer.h"
 
+const char *HaloghtServer::FIELD_DEFAULT_COLOR = "defaultColor";
+const char *HaloghtServer::FIELD_HOSTNAME_SUFFIX = "hostnameSuffix";
+
 HaloghtServer::HaloghtServer(LedController *ledController)
 {
     this->ledController = ledController;
     this->webServer = new AsyncWebServer(80);
 
     webServer->on("/", [&](AsyncWebServerRequest *request) -> void { this->handleRoot(request); });
+    webServer->on("/settingsPage", [&](AsyncWebServerRequest *request) -> void { this->handleSettingsPage(request); });
     webServer->on("/state", HTTP_GET, [&](AsyncWebServerRequest *request) -> void { this->handleGetState(request); });
     webServer->on("/onOffState", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleOnOffSwitch(request); });
     webServer->on("/setSolidColor", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleSetSolidColor(request); });
     webServer->on("/setBrightness", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleSetBrightness(request); });
     webServer->on("/sendFire", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleFire(request); });
     webServer->on("/sendWater", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleWater(request); });
+    webServer->on("/settings", HTTP_GET, [&](AsyncWebServerRequest *request) -> void { this->handleGetSettings(request); });
+    webServer->on("/settings", HTTP_POST,
+                  [](AsyncWebServerRequest *request) -> void { request->send(400, "text/plain", "No data!"); },
+                  [](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) -> void { request->send(400, "text/plain", "Wrong data!"); },
+                  [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) -> void { this->handleUpdateSettings(request, data, len, index, total); });
     webServer->onFileUpload([&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) -> void { this->handleUpdate(request, filename, index, data, len, final); });
+
     WebServerExtensions::registerBootstrap(*webServer);
     WebServerExtensions::registerNotFound(*webServer);
 
@@ -30,6 +40,13 @@ void HaloghtServer::handleRoot(AsyncWebServerRequest *request)
     logDebug("Root called!");
 
     request->send(200, "text/html", pageHaloghtServerRoot);
+}
+
+void HaloghtServer::handleSettingsPage(AsyncWebServerRequest *request)
+{
+    logDebug("SettingsPage called!");
+
+    request->send(200, "text/html", pageHaloghtServerSettings);
 }
 
 void HaloghtServer::handleSetBrightness(AsyncWebServerRequest *request)
@@ -81,7 +98,7 @@ void HaloghtServer::handleSetSolidColor(AsyncWebServerRequest *request)
         uint8_t green;
         uint8_t blue;
 
-        extractColorFromString(request->arg("color"), &red, &green, &blue);
+        HelperFunctions::extractColorFromString(request->arg("color"), &red, &green, &blue);
 
         ledController->setSolidColor(red, green, blue);
         request->send(200, "text/plain", "OK");
@@ -162,25 +179,76 @@ void HaloghtServer::handleGetState(AsyncWebServerRequest *request)
     request->send(200, "application/json", stateString);
 }
 
-void HaloghtServer::extractColorFromString(String str, uint8_t *r, uint8_t *g, uint8_t *b)
+void HaloghtServer::handleGetSettings(AsyncWebServerRequest *request)
 {
-    char color[8];
-    str.toCharArray(color, 8);
+    logDebug("GetSettings called!");
 
-    char redPart[3];
-    char greenPart[3];
-    char bluePart[3];
+    Preferences preferencesLedSetup;
+    Preferences preferencesWiFiSetup;
 
-    strncpy(redPart, color + 1, 2);
-    redPart[2] = 0;
-    strncpy(greenPart, color + 3, 2);
-    greenPart[2] = 0;
-    strncpy(bluePart, color + 5, 2);
-    bluePart[2] = 0;
+    preferencesLedSetup.begin(PREFERENCES_LEDSETUP, true);
+    preferencesWiFiSetup.begin(PREFERENCES_WIFI, true);
 
-    *r = strtol(redPart, NULL, 16);
-    *g = strtol(greenPart, NULL, 16);
-    *b = strtol(bluePart, NULL, 16);
+    String defaultColor = preferencesLedSetup.getString(SETTING_DEFAULT_COLOR, "");
+    String hostnameSuffix = preferencesWiFiSetup.getString(SETTING_HOSTNAME_SUFFIX, "");
+
+    DynamicJsonDocument doc(1024);
+
+    doc[FIELD_DEFAULT_COLOR] = defaultColor.c_str();
+    doc[FIELD_HOSTNAME_SUFFIX] = hostnameSuffix.c_str();
+
+    String json;
+    serializeJson(doc, json);
+
+    request->send(200, "application/json", json);
+}
+
+void HaloghtServer::handleUpdateSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total)
+{
+    logDebug("Update settings called!");
+
+    if (len != total)
+    {
+        request->send(500, "text/plain", "Oops...!");
+    }
+    else
+    {
+        DynamicJsonDocument doc(len);
+        if (deserializeJson(doc, data) != DeserializationError::Ok)
+        {
+            request->send(400, "text/plain", "Could not parse JSON!");
+        }
+        else if (!doc.containsKey(FIELD_DEFAULT_COLOR))
+        {
+            request->send(400, "text/plain", String("Missing parameter: ") + String(FIELD_DEFAULT_COLOR));
+        }
+        else if (!doc.containsKey(FIELD_HOSTNAME_SUFFIX))
+        {
+            request->send(400, "text/plain", String("Missing parameter: ") + String(FIELD_HOSTNAME_SUFFIX));
+        }
+        else
+        {
+            Preferences preferencesLedSetup;
+            Preferences preferencesWiFiSetup;
+
+            preferencesLedSetup.begin(PREFERENCES_LEDSETUP, false);
+            preferencesWiFiSetup.begin(PREFERENCES_WIFI, false);
+
+            String defaultColor = doc[FIELD_DEFAULT_COLOR];
+            String hostnameSuffix = doc[FIELD_HOSTNAME_SUFFIX];
+
+            preferencesLedSetup.putString(SETTING_DEFAULT_COLOR, defaultColor);
+            preferencesWiFiSetup.putString(SETTING_HOSTNAME_SUFFIX, hostnameSuffix);
+
+            preferencesLedSetup.end();
+            preferencesWiFiSetup.end();
+
+            request->send(200, "text/plain", "OK, restarting ESP...");
+            delay(300);
+            logDebug("Restarting ESP...");
+            ESP.restart();
+        }
+    }
 }
 
 void HaloghtServer::logDebug(String message)

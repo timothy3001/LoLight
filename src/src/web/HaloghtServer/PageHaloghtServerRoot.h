@@ -287,6 +287,7 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
                     class="btn btn-default"
                     style="width: 100%;"
                     id="sendWaterButton"
+                    onclick="location.href = '/settingsPage';"
                   >
                     Open settings
                   </button>

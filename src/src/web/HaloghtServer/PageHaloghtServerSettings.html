@@ -16,14 +16,51 @@
       defaultColorInput = document.getElementById("defaultColorInput");
       hostnameSuffixInput = document.getElementById("hostnameSuffixInput");
 
-      submitButton.addEventListener("click", () => {
-        var data = {};
-        data.defaultColor = defaultColorInput.value;
-        data.hostnameSuffix = hostnameSuffixInput.text;
+      var settingsStateReq = new XMLHttpRequest();
+      settingsStateReq.open("GET", "/settings", true);
+      settingsStateReq.onreadystatechange = function () {
+          if (settingsStateReq.readyState == 4) {
+              if (settingsStateReq.status == 200) {
+                  var data = settingsStateReq.responseText;
+                  var json = JSON.parse(data);
 
-        sendPostJson("/updateSettings", data);
-      });
+                  defaultColorInput.value = json.defaultColor;
+                  hostnameSuffixInput.value = json.hostnameSuffix;
+
+                  registerButtons();
+              } else {
+                console.log("Error: Could not load settings!");
+              }
+          }
+      };
+      settingsStateReq.send(null);      
     };
+
+    function registerButtons()
+    {
+      submitButton.addEventListener("click", function() {
+        var json = {};
+        json.defaultColor = defaultColorInput.value;
+        json.hostnameSuffix = hostnameSuffixInput.value;
+
+        var data = JSON.stringify(json);
+
+        var updateSettingsReq = new XMLHttpRequest();
+        updateSettingsReq.open("POST", "/settings", true);
+        updateSettingsReq.onreadystatechange = function() {
+          if (updateSettingsReq.readyState == 4) {
+            if (updateSettingsReq.status == 200) {
+              setTimeout(function() {
+                window.location.href = "/";
+              }, 3000);              
+            } else {
+              console.log("Error: Could not update settings!");
+            }
+          }
+        }
+        updateSettingsReq.send(data);
+      });
+    }
 
     function sendPostJson(url, data) {
       var req = new XMLHttpRequest();
@@ -47,7 +84,7 @@
     </div>
     <div class="row">
       <div class="col-sm-8">
-        <form class="form-horizontal">
+        <form class="form-horizontal" action="javascript:void(0);">
           <div class="form-group">
             <label class="control-label" for="defaultColorInput">Default color</label>
             <input type="color" class="form-control" id="defaultColorInput" name="defaultColorInput"

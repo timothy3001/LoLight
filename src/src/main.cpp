@@ -36,7 +36,7 @@ void setup()
     {
         // Turn LEDs on to desired state
         Serial.println("Valid config found, turning LEDs on to desired state...");
-        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds());
+        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds(), LedSetup::getDefaultColor());
 
         ledController->setDefault();
         ledController->handle();
@@ -57,7 +57,7 @@ void setup()
 
     Serial.println("WiFi and LEDs setup successful! Starting regular operation...");
     if (!ledController)
-        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds());
+        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds(), LedSetup::getDefaultColor());
 
     haloghtServer = new HaloghtServer(ledController);
 }

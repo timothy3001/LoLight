@@ -13,6 +13,7 @@
 #include "../web/WiFiSetup/PageWiFiSetupServerRoot.h"
 #include "../web/WiFiSetup/PageWiFiSetupServerWrongSsid.h"
 #include "../web/WiFiSetup/PageWiFiSetupServerOk.h"
+#include "../Constants.h"
 
 class WiFiSetup
 {
@@ -21,10 +22,7 @@ public:
   static char *hostnamePrefix;
 
 private:
-  static const char *PREFERENCES_WIFI;
-  static const char *SETTING_SSID;
-  static const char *SETTING_PASSWORD;
-
+  static String hostnameSuffix;
   static bool doRestart;
 
   static void logDebug(String message);
@@ -35,7 +33,7 @@ private:
   static void handleRoot(AsyncWebServerRequest *request);
   static void handlePostConfiguration(AsyncWebServerRequest *request);
 
-  static String getHostname();
+  static String getShortMac();
 
   static AsyncWebServer *server;
   static DNSServer *dnsServer;

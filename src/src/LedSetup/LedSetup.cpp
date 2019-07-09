@@ -1,29 +1,35 @@
 #include "LedSetup.h"
 
-const char *LedSetup::PREFERENCES_LEDSETUP = "Led-Setup";
-const char *LedSetup::SETTING_LED_AMOUNT = "ledAmount";
-const char *LedSetup::SETTING_DATA_PIN = "dataPin";
-
 AsyncWebServer *LedSetup::webServer = NULL;
 int LedSetup::numLeds = -1;
 int LedSetup::dataPin = -1;
 bool LedSetup::doRestart = false;
 bool LedSetup::configurationValid = false;
+String LedSetup::defaultColor = "";
 
 void LedSetup::loadConfiguration()
 {
     Preferences preferences;
-    preferences.begin(PREFERENCES_LEDSETUP, true);
+    preferences.begin(PREFERENCES_LEDSETUP, false);
 
     configurationValid = false;
 
     numLeds = preferences.getInt(SETTING_LED_AMOUNT, -1);
     dataPin = preferences.getInt(SETTING_DATA_PIN, -1);
+    defaultColor = preferences.getString(SETTING_DEFAULT_COLOR, "");
+
+    if (defaultColor.length() == 0)
+    {
+        defaultColor = "#DCAA5A";
+        preferences.putString(SETTING_DEFAULT_COLOR, defaultColor);
+    }
 
     if (numLeds > 0 && dataPin >= 0)
     {
         configurationValid = true;
     }
+
+    preferences.end();
 }
 
 void LedSetup::setup()
@@ -60,6 +66,11 @@ int LedSetup::getNumLeds()
 int LedSetup::getDataPin()
 {
     return dataPin;
+}
+
+String &LedSetup::getDefaultColor()
+{
+    return defaultColor;
 }
 
 bool LedSetup::isConfigurationValid()
