@@ -5,7 +5,7 @@ const char pageHaloghtServerSettings[] PROGMEM = R"=====(
 <!DOCTYPE html>
 
 <head>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="/bootstrap.min.css" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
   <script>
@@ -54,9 +54,7 @@ const char pageHaloghtServerSettings[] PROGMEM = R"=====(
         updateSettingsReq.onreadystatechange = function() {
           if (updateSettingsReq.readyState == 4) {
             if (updateSettingsReq.status == 200) {
-              setTimeout(function() {
-                window.location.href = "/";
-              }, 3000);              
+              redirectToRoot();             
             } else {
               console.log("Error: Could not update settings!");
             }
@@ -64,13 +62,20 @@ const char pageHaloghtServerSettings[] PROGMEM = R"=====(
         }
         updateSettingsReq.send(data);
       });
+
+      resetButton.addEventListener("click", function() {
+        var req = new XMLHttpRequest();
+        req.open("POST", "/resetSettings", true);
+        req.send(null);
+
+        redirectToRoot();
+      });
     }
 
-    function sendPostJson(url, data) {
-      var req = new XMLHttpRequest();
-      req.open("POST", url, true);
-      req.setRequestHeader("Content-type", "application/json");
-      req.send(data);
+    function redirectToRoot() {
+      setTimeout(function() {
+        window.location.href = "/";
+      }, 3000);  
     }
   </script>
   <style></style>

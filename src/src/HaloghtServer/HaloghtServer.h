@@ -35,6 +35,7 @@ private:
     void handleUpdateSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
     void handleUpdate(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
     void handleUpdateUpload(AsyncWebServerRequest *request);
+    void handleResetSettings(AsyncWebServerRequest *request);
 
     void logDebug(String message);
 

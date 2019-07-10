@@ -22,6 +22,7 @@ HaloghtServer::HaloghtServer(LedController *ledController)
                   [](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) -> void { request->send(400, "text/plain", "Wrong data!"); },
                   [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) -> void { this->handleUpdateSettings(request, data, len, index, total); });
     webServer->onFileUpload([&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) -> void { this->handleUpdate(request, filename, index, data, len, final); });
+    webServer->on("/resetSettings", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleResetSettings(request); });
 
     WebServerExtensions::registerBootstrap(*webServer);
     WebServerExtensions::registerNotFound(*webServer);
@@ -249,6 +250,28 @@ void HaloghtServer::handleUpdateSettings(AsyncWebServerRequest *request, uint8_t
             ESP.restart();
         }
     }
+}
+
+void HaloghtServer::handleResetSettings(AsyncWebServerRequest *request)
+{
+    logDebug("ResetSettings called!");
+
+    Preferences preferencesLedSetup;
+    Preferences preferencesWiFiSetup;
+
+    preferencesLedSetup.begin(PREFERENCES_LEDSETUP, false);
+    preferencesWiFiSetup.begin(PREFERENCES_WIFI, false);
+
+    preferencesLedSetup.clear();
+    preferencesWiFiSetup.clear();
+
+    preferencesLedSetup.end();
+    preferencesWiFiSetup.end();
+
+    request->send(200, "text/plain", "OK, restarting ESP...");
+    delay(300);
+    logDebug("Settings reset, restarting ESP...");
+    ESP.restart();
 }
 
 void HaloghtServer::logDebug(String message)

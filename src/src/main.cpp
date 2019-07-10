@@ -10,23 +10,8 @@
 LedController *ledController;
 HaloghtServer *haloghtServer;
 
-void resetPreferences()
-{
-    Preferences preferencesLedSetup;
-    Preferences preferencesWiFiSetup;
-    preferencesLedSetup.begin("Led-Setup", false);
-    preferencesWiFiSetup.begin("WiFi-Setup", false);
-    preferencesLedSetup.clear();
-    preferencesWiFiSetup.clear();
-    preferencesLedSetup.end();
-    preferencesWiFiSetup.end();
-}
-
 void setup()
 {
-    // Reset preferences
-    // resetPreferences();
-
     Serial.begin(9600);
 
     Serial.println("Reading LED config...");
