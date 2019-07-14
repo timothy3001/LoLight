@@ -3,7 +3,10 @@
 
 #include <Arduino.h>
 #include <ESPAsyncWebServer.h>
-#include "../web/bootstrap-min-css.h"
+#include "../web/Bootstrap/bootstrap-min-css.h"
+#include "../web/Bootstrap/bootstrap-min-js.h"
+#include "../web/Bootstrap/jquery-3-3-1-slim-min-js.h"
+#include "../web/Bootstrap/popper-min-js.h"
 
 class WebServerExtensions
 {

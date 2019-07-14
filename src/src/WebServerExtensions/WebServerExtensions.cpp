@@ -25,6 +25,9 @@ void WebServerExtensions::registerLargeFileEndpoint(String endPointName, String 
 void WebServerExtensions::registerBootstrap(AsyncWebServer &server)
 {
     registerLargeFileEndpoint("/bootstrap.min.css", "text/css; charset=utf-8", server, bootstrapMinCss, sizeof(bootstrapMinCss) / sizeof(byte));
+    registerLargeFileEndpoint("/bootstrap.min.js", "text/javascript; charset=utf-8", server, bootstrapMinJs, sizeof(bootstrapMinJs) / sizeof(byte));
+    registerLargeFileEndpoint("/jquery-3.3.1.slim.min.js", "text/javascript; charset=utf-8", server, jquery331SlimMinJs, sizeof(jquery331SlimMinJs) / sizeof(byte));
+    registerLargeFileEndpoint("/popper.min.js", "text/javascript; charset=utf-8", server, popperMinJs, sizeof(popperMinJs) / sizeof(byte));
 }
 
 void WebServerExtensions::registerNotFound(AsyncWebServer &server)
