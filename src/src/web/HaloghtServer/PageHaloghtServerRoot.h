@@ -7,6 +7,8 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
   <link
     rel="stylesheet"
     href="/bootstrap.min.css"
+    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+    crossorigin="anonymous"
   />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
@@ -213,13 +215,14 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
                     id="solidColorInput"
                     name="solidColorInput"
                     style="height: 50px; width: 100%;"
+                    value="#FFFFFF"
                   />
                 </div>
               </div>
               <div class="form-group">
                 <div class="col-sm-12">
                   <button
-                    class="btn btn-default"
+                    class="btn btn-secondary"
                     style="width: 100%;"
                     id="sendSolidColorButton"
                   >
@@ -240,7 +243,7 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
               <div class="form-group">
                 <div class="col-sm-12">
                   <button
-                    class="btn btn-default"
+                    class="btn btn-secondary"
                     style="width: 100%;"
                     id="sendWaterButton"
                   >
@@ -263,7 +266,7 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
               <div class="form-group">
                 <div class="col-sm-12">
                   <button
-                    class="btn btn-default"
+                    class="btn btn-secondary"
                     style="width: 100%;"
                     id="sendFireButton"
                   >
@@ -284,7 +287,7 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
               <div class="form-group">
                 <div class="col-sm-12">
                   <button
-                    class="btn btn-default"
+                    class="btn btn-secondary"
                     style="width: 100%;"
                     id="sendWaterButton"
                     onclick="location.href = '/settingsPage';"
