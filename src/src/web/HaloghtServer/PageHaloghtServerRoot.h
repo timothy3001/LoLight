@@ -7,8 +7,6 @@ const char pageHaloghtServerRoot[] PROGMEM = R"=====(
   <link
     rel="stylesheet"
     href="/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-    crossorigin="anonymous"
   />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />

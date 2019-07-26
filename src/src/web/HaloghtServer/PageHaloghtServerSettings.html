@@ -4,38 +4,23 @@
   <link
     rel="stylesheet"
     href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-    integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-    crossorigin="anonymous"
   />
-  <script
-    src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-    integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-    crossorigin="anonymous"
-  ></script>
-  <script
-    src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-    integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-    crossorigin="anonymous"
-  ></script>
-  <script
-    src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-    integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-    crossorigin="anonymous"
-  ></script>
 
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta charset="utf-8" />
   <script>
-    var submitConfirmButton;
-    var resetConfirmButton;
+    var submitButton;
+    var resetButton;
     var defaultColorInput;
     var hostnameSuffixInput;
 
     window.onload = function() {
-      submitConfirmButton = document.getElementById("submitConfirmButton");
-      resetConfirmButton = document.getElementById("resetConfirmButton");
+      submitButton = document.getElementById("submitButton");
+      resetButton = document.getElementById("resetButton");
       defaultColorInput = document.getElementById("defaultColorInput");
       hostnameSuffixInput = document.getElementById("hostnameSuffixInput");
+
+      registerResetButton();
 
       var settingsStateReq = new XMLHttpRequest();
       settingsStateReq.open("GET", "/settings", true);
@@ -48,7 +33,7 @@
             defaultColorInput.value = json.defaultColor;
             hostnameSuffixInput.value = json.hostnameSuffix;
 
-            registerButtons();
+            registerSubmitButton();
           } else {
             console.log("Error: Could not load settings!");
           }
@@ -57,34 +42,48 @@
       settingsStateReq.send(null);
     };
 
-    function registerButtons() {
-      submitConfirmButton.addEventListener("click", function() {
-        var json = {};
-        json.defaultColor = defaultColorInput.value;
-        json.hostnameSuffix = hostnameSuffixInput.value;
+    function registerResetButton() {
+      resetButton.addEventListener("click", function() {
+        var confirmation = confirm(
+          "Are you sure that you want to reset all settings?"
+        );
 
-        var data = JSON.stringify(json);
+        if (confirmation) {
+          var req = new XMLHttpRequest();
+          req.open("POST", "/resetSettings", true);
+          req.send(null);
 
-        var updateSettingsReq = new XMLHttpRequest();
-        updateSettingsReq.open("POST", "/settings", true);
-        updateSettingsReq.onreadystatechange = function() {
-          if (updateSettingsReq.readyState == 4) {
-            if (updateSettingsReq.status == 200) {
-              redirectToRoot();
-            } else {
-              console.log("Error: Could not update settings!");
-            }
-          }
-        };
-        updateSettingsReq.send(data);
+          redirectToRoot();
+        }
       });
+    }
 
-      resetConfirmButton.addEventListener("click", function() {
-        var req = new XMLHttpRequest();
-        req.open("POST", "/resetSettings", true);
-        req.send(null);
+    function registerSubmitButton() {
+      submitButton.addEventListener("click", function() {
+        var confirmation = confirm(
+          "Are you sure that you want to update the settings?"
+        );
 
-        redirectToRoot();
+        if (confirmation) {
+          var json = {};
+          json.defaultColor = defaultColorInput.value;
+          json.hostnameSuffix = hostnameSuffixInput.value;
+
+          var data = JSON.stringify(json);
+
+          var updateSettingsReq = new XMLHttpRequest();
+          updateSettingsReq.open("POST", "/settings", true);
+          updateSettingsReq.onreadystatechange = function() {
+            if (updateSettingsReq.readyState == 4) {
+              if (updateSettingsReq.status == 200) {
+                redirectToRoot();
+              } else {
+                console.log("Error: Could not update settings!");
+              }
+            }
+          };
+          updateSettingsReq.send(data);
+        }
       });
     }
 
@@ -147,89 +146,18 @@
           <div class="form-group">
             <div class="row">
               <div class="col-6">
-                <button
-                  class="btn btn-secondary"
-                  data-target="#submitButtonModal"
-                  data-toggle="modal"
-                >
+                <button class="btn btn-secondary" id="submitButton">
                   Submit
                 </button>
               </div>
               <div class="col-6">
-                <button
-                  class="btn btn-danger float-right"
-                  data-target="#resetButtonModal"
-                  data-toggle="modal"
-                >
+                <button class="btn btn-danger float-right" id="resetButton">
                   Reset
                 </button>
               </div>
             </div>
           </div>
         </form>
-      </div>
-    </div>
-  </div>
-  <div class="modal fade" id="resetButtonModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Reset</h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>Are you sure you want to reset all settings?</p>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary" id="resetConfirmButton">
-            Yes
-          </button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            No
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div class="modal fade" id="submitButtonModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title">Submit changes</h5>
-          <button
-            type="button"
-            class="close"
-            data-dismiss="modal"
-            aria-label="Close"
-          >
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-          <p>
-            Are you sure you want to submit the changes? The microcontroller
-            will restart afterwards.
-          </p>
-        </div>
-        <div class="modal-footer">
-          <button
-            type="button"
-            class="btn btn-primary"
-            id="submitConfirmButton"
-          >
-            Yes
-          </button>
-          <button type="button" class="btn btn-secondary" data-dismiss="modal">
-            No
-          </button>
-        </div>
       </div>
     </div>
   </div>
