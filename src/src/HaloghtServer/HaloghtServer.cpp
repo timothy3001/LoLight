@@ -16,6 +16,7 @@ HaloghtServer::HaloghtServer(LedController *ledController)
     webServer->on("/setBrightness", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleSetBrightness(request); });
     webServer->on("/sendFire", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleFire(request); });
     webServer->on("/sendWater", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleWater(request); });
+    webServer->on("/sendStroboscope", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleStroboscope(request); });
     webServer->on("/settings", HTTP_GET, [&](AsyncWebServerRequest *request) -> void { this->handleGetSettings(request); });
     webServer->on("/settings", HTTP_POST,
                   [](AsyncWebServerRequest *request) -> void { request->send(400, "text/plain", "No data!"); },
@@ -122,7 +123,15 @@ void HaloghtServer::handleWater(AsyncWebServerRequest *request)
 {
     logDebug("SendWater called!");
 
-    ledController->setTwoColorBlendingAnimated(5000, false, true, 0, 32, 253, 85, 242, 255);
+    ledController->setTwoColorBlendingAnimated(3500, false, true, 0, 32, 253, 103, 248, 255);
+    request->send(200, "text/plain", "OK");
+}
+
+void HaloghtServer::handleStroboscope(AsyncWebServerRequest *request)
+{
+    logDebug("Stroboscope called!");
+
+    ledController->setStroboscope(50, 255, 255, 255);
     request->send(200, "text/plain", "OK");
 }
 

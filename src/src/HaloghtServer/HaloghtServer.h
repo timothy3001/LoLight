@@ -29,6 +29,7 @@ private:
     void handleSetSolidColor(AsyncWebServerRequest *request);
     void handleFire(AsyncWebServerRequest *request);
     void handleWater(AsyncWebServerRequest *request);
+    void handleStroboscope(AsyncWebServerRequest *request);
     void handleOnOffSwitch(AsyncWebServerRequest *request);
     void handleGetState(AsyncWebServerRequest *request);
     void handleGetSettings(AsyncWebServerRequest *request);

@@ -97,6 +97,17 @@ void LedController::setTwoColorBlendingAnimated(int cycleDuration, bool randomSt
     handle();
 }
 
+void LedController::setStroboscope(int speed, uint8_t r, uint8_t g, uint8_t b)
+{
+    turnedOn = true;
+    logDebug("Setting stroboscope...");
+    if (currentVisualization)
+        delete currentVisualization;
+    currentVisualization = (LedVisualizationBase *)new LedVisualizationStroboscope(numLeds, speed, r, g, b);
+    nextCheck = 0;
+    handle();
+}
+
 void LedController::setPixels()
 {
     for (int i = 0; i < numLeds; i++)
