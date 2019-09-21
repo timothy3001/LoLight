@@ -2,6 +2,14 @@
 
 void WebServerExtensions::registerLargeFileEndpoint(String endPointName, String contentType, AsyncWebServer &server, const byte *file, int fileSize)
 {
+    server.on(endPointName.c_str(), HTTP_GET, [contentType, file, fileSize](AsyncWebServerRequest *request) {
+        AsyncWebServerResponse *response = request->beginResponse_P(200, contentType, file, fileSize);
+        request->send(response);
+    });
+}
+
+void WebServerExtensions::registerLargeFileChunkedEndpoint(String endPointName, String contentType, AsyncWebServer &server, const byte *file, int fileSize)
+{
     server.on(endPointName.c_str(), HTTP_GET, [endPointName, contentType, file, fileSize](AsyncWebServerRequest *request) {
         AsyncWebServerResponse *response = request->beginChunkedResponse(contentType, [file, fileSize, endPointName](uint8_t *buffer, size_t maxLen, size_t index) -> size_t {
             if (index >= fileSize)
@@ -12,6 +20,7 @@ void WebServerExtensions::registerLargeFileEndpoint(String endPointName, String 
             else if (index == 0)
             {
                 logDebug(String("Start sending large file '") + String(endPointName) + String("'"));
+                logDebug(String("File size: ") + String(fileSize));
             }
 
             int endPosition = index + (maxLen - 1) < fileSize ? index + (maxLen - 1) : fileSize - 1;

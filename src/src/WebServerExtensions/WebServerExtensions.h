@@ -9,6 +9,7 @@ class WebServerExtensions
 {
 public:
   static void registerLargeFileEndpoint(String endPointName, String contentType, AsyncWebServer &server, const byte *file, int fileSize);
+  static void registerLargeFileChunkedEndpoint(String endPointName, String contentType, AsyncWebServer &server, const byte *file, int fileSize);
   static void registerBootstrap(AsyncWebServer &server);
   static void registerNotFound(AsyncWebServer &server);
 
