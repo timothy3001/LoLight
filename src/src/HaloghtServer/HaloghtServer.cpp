@@ -40,8 +40,8 @@ HaloghtServer::~HaloghtServer()
 void HaloghtServer::handleRoot(AsyncWebServerRequest *request)
 {
     logDebug("Root called!");
-
-    request->send(200, "text/html", pageHaloghtServerRoot);
+    AsyncWebServerResponse *response = request->beginResponse_P(200, "text/html", (const byte *)pageHaloghtServerRoot, sizeof(pageHaloghtServerRoot) / sizeof(byte));
+    request->send(response);
 }
 
 void HaloghtServer::handleSettingsPage(AsyncWebServerRequest *request)
