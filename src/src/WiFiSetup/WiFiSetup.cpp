@@ -159,6 +159,7 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
     while (!doRestart)
     {
         dnsServer->processNextRequest();
+        delay(1);
     }
 
     logDebug("ESP about to restart...");
