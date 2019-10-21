@@ -123,6 +123,11 @@ void WiFiSetup::WiFiEventHandler(WiFiEvent_t event, system_event_info_t info)
     switch (event)
     {
     case WIFI_REASON_ASSOC_TOOMANY:
+        logDebug(String("WORKAROUND for wifi happening! Rebooting..."));
+        Serial.flush();
+
+        delay(500);
+
         ESP.restart();
         break;
     }
