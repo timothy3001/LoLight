@@ -32,7 +32,7 @@ void setup()
     Serial.println("Reading LED config...");
     LedSetup::loadConfiguration();
 
-    if (LedSetup::isConfigurationValid() && rtc_get_reset_reason(0) != 12)
+    if (LedSetup::isConfigurationValid() && !WiFiSetup::wasWorkaroundExecuted())
     {
         // Turn LEDs on to desired state (only if configuration is valid and the ESP wasn't reset by software.
         // Currently a workaround to prevent turning on after a ESP reset due to WiFi)

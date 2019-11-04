@@ -8,6 +8,7 @@
 #include <esp_system.h>
 #include <DNSServer.h>
 #include <ESPmDNS.h>
+#include <rom/rtc.h>
 
 #include "../WebServerExtensions/WebServerExtensions.h"
 #include "../web/WiFiSetup/PageWiFiSetupServerRoot.h"
@@ -19,6 +20,7 @@ class WiFiSetup
 {
 public:
   static void setup();
+  static bool wasWorkaroundExecuted();
   static char *hostnamePrefix;
 
 private:

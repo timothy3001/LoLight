@@ -1,5 +1,7 @@
 #include "WiFiSetup.h"
 
+RTC_NOINIT_ATTR bool wifiWorkaroundRtcAttr = false;
+
 AsyncWebServer *WiFiSetup::server = NULL;
 DNSServer *WiFiSetup::dnsServer = NULL;
 char *WiFiSetup::hostnamePrefix = "WiFiSetup";
@@ -126,11 +128,20 @@ void WiFiSetup::WiFiEventHandler(WiFiEvent_t event, system_event_info_t info)
         logDebug(String("WORKAROUND for wifi happening! Rebooting..."));
         Serial.flush();
 
+        wifiWorkaroundRtcAttr = true;
+
         delay(500);
 
         ESP.restart();
         break;
     }
+}
+
+bool WiFiSetup::wasWorkaroundExecuted()
+{
+    if (rtc_get_reset_reason(0) == 12 && wifiWorkaroundRtcAttr)
+        return true;
+    return false;
 }
 
 void WiFiSetup::runWiFiConfigurationServer(String apName)

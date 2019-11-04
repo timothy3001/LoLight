@@ -10,7 +10,9 @@ LedController::LedController(int dataPin, int numLeds, String defaultColor)
 
     this->strip = new NeoPixelBus<NeoGrbwFeature, Neo800KbpsMethod>(this->numLeds, this->dataPin);
     strip->Begin();
-    strip->Show();
+
+    // Disabled for workaround of wifi restarts
+    // strip->Show();
 }
 
 LedController::~LedController()
