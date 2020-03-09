@@ -208,7 +208,7 @@ void HaloghtServer::handleDebugInfo(AsyncWebServerRequest *request)
     String minutesString = minutes > 9 ? String(minutes) : String("0") + String(minutes);
     String secondsString = seconds > 9 ? String(seconds) : String("0") + String(seconds);
 
-    upTime += String(days) + String(" days, ") + hourString + String(":") + minutesString + String(":") + secondsString;
+    upTime += String("Uptime: ") + String(days) + String(" days, ") + hourString + String(":") + minutesString + String(":") + secondsString;
 
     request->send(200, "text/plain", upTime);
 }
