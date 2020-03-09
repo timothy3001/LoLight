@@ -34,6 +34,8 @@ private:
     void handleGetState(AsyncWebServerRequest *request);
     void handleGetSettings(AsyncWebServerRequest *request);
     void handleUpdateSettings(AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total);
+    void handleDebugInfo(AsyncWebServerRequest *request);
+
     void handleUpdate(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final);
     void handleUpdateUpload(AsyncWebServerRequest *request);
     void handleResetSettings(AsyncWebServerRequest *request);

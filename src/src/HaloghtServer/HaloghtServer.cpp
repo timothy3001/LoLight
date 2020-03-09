@@ -22,6 +22,7 @@ HaloghtServer::HaloghtServer(LedController *ledController)
                   [](AsyncWebServerRequest *request) -> void { request->send(400, "text/plain", "No data!"); },
                   [](AsyncWebServerRequest *request, const String &filename, size_t index, uint8_t *data, size_t len, bool final) -> void { request->send(400, "text/plain", "Wrong data!"); },
                   [&](AsyncWebServerRequest *request, uint8_t *data, size_t len, size_t index, size_t total) -> void { this->handleUpdateSettings(request, data, len, index, total); });
+    webServer->on("/debugInfo", HTTP_GET, [&](AsyncWebServerRequest *request) -> void { this->handleDebugInfo(request); });
     webServer->onFileUpload([&](AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) -> void { this->handleUpdate(request, filename, index, data, len, final); });
     webServer->on("/resetSettings", HTTP_POST, [&](AsyncWebServerRequest *request) -> void { this->handleResetSettings(request); });
 
@@ -187,6 +188,29 @@ void HaloghtServer::handleGetState(AsyncWebServerRequest *request)
     stateString += String("}");
 
     request->send(200, "application/json", stateString);
+}
+
+void HaloghtServer::handleDebugInfo(AsyncWebServerRequest *request)
+{
+    int millisPerDay = 1000 * 60 * 60 * 24;
+    int millisPerHour = 1000 * 60 * 60;
+    int millisPerMinute = 1000 * 60;
+    int millisPerSecond = 1000;
+
+    ulong now = millis();
+    String upTime = "";
+    int days = (int)(floor(now / (double)millisPerDay));
+    int hours = (int)(floor((now % millisPerDay) / (double)millisPerHour));
+    int minutes = (int)(floor((now % millisPerHour) / (double)millisPerMinute));
+    int seconds = (int)(floor((now % millisPerMinute) / (double)millisPerSecond));
+
+    String hourString = hours > 9 ? String(hours) : String("0") + String(hours);
+    String minutesString = minutes > 9 ? String(minutes) : String("0") + String(minutes);
+    String secondsString = seconds > 9 ? String(seconds) : String("0") + String(seconds);
+
+    upTime += String(days) + String(" days, ") + hourString + String(":") + minutesString + String(":") + secondsString;
+
+    request->send(200, "text/plain", upTime);
 }
 
 void HaloghtServer::handleGetSettings(AsyncWebServerRequest *request)
