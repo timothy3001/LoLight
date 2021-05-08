@@ -191,7 +191,7 @@ void HaloghtServer::handleGetState(AsyncWebServerRequest *request)
     request->send(200, "application/json", stateString);
 }
 
-void HaloghtServer::handleDebugInfo(AsyncWebServerRequest *request)
+String HaloghtServer::runtimeInfo()
 {
     int millisPerDay = 1000 * 60 * 60 * 24;
     int millisPerHour = 1000 * 60 * 60;
@@ -199,7 +199,7 @@ void HaloghtServer::handleDebugInfo(AsyncWebServerRequest *request)
     int millisPerSecond = 1000;
 
     ulong now = millis();
-    String upTime = "";
+    
     int days = (int)(floor(now / (double)millisPerDay));
     int hours = (int)(floor((now % millisPerDay) / (double)millisPerHour));
     int minutes = (int)(floor((now % millisPerHour) / (double)millisPerMinute));
@@ -209,9 +209,26 @@ void HaloghtServer::handleDebugInfo(AsyncWebServerRequest *request)
     String minutesString = minutes > 9 ? String(minutes) : String("0") + String(minutes);
     String secondsString = seconds > 9 ? String(seconds) : String("0") + String(seconds);
 
-    upTime += String("Uptime: ") + String(days) + String(" days, ") + hourString + String(":") + minutesString + String(":") + secondsString;
+    return String("Uptime: ") + String(days) + String(" days, ") + hourString + String(":") + minutesString + String(":") + secondsString;
+}
 
-    request->send(200, "text/plain", upTime);
+void HaloghtServer::handleDebugInfo(AsyncWebServerRequest *request)
+{
+    // Time info
+    String debugInfo = this->runtimeInfo() + String("\n");    
+
+    // LEDs info
+    Preferences preferencesLedSetup;
+    Preferences preferencesWiFiSetup;
+
+    preferencesLedSetup.begin(PREFERENCES_LEDSETUP, true);
+    int numberLeds = preferencesLedSetup.getInt(SETTING_LED_AMOUNT, 0);
+    int ledPin = preferencesLedSetup.getInt(SETTING_DATA_PIN, 0);
+
+    debugInfo = debugInfo + "Number LEDs: " + String(numberLeds) + String("\n");
+    debugInfo = debugInfo + "Data pin: " + String(ledPin) + String("\n");
+    
+    request->send(200, "text/plain", debugInfo);
 }
 
 void HaloghtServer::handleGetSettings(AsyncWebServerRequest *request)

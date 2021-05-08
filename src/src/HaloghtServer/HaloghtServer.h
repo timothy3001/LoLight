@@ -40,6 +40,8 @@ private:
     void handleUpdateUpload(AsyncWebServerRequest *request);
     void handleResetSettings(AsyncWebServerRequest *request);
 
+    String runtimeInfo();
+
     void logDebug(String message);
 
 public:
