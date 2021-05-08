@@ -72,9 +72,10 @@ void WiFiSetup::setup()
 
         WiFi.mode(WIFI_STA);
         WiFi.disconnect();
+        WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
         WiFi.begin(ssid, password);
-        WiFi.onEvent(WiFiEventHandler);
         WiFi.setHostname(hostname.c_str());
+        WiFi.onEvent(WiFiEventHandler);
 
         unsigned long startTimeConnecting = millis();
         while (WiFi.status() != WL_CONNECTED && millis() < startTimeConnecting + 30000)
