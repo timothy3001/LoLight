@@ -7,6 +7,7 @@ DNSServer *WiFiSetup::dnsServer = NULL;
 char *WiFiSetup::hostnamePrefix = "WiFiSetup";
 bool WiFiSetup::doRestart = false;
 String WiFiSetup::hostnameSuffix = "";
+unsigned long WiFiSetup::rebootTimestamp = 0;
 
 String WiFiSetup::getShortMac()
 {
@@ -149,6 +150,7 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
 {
     String logMessage = String("Starting access point with name '") + apName + String("'...");
     logDebug(logMessage);
+    rebootTimestamp = millis();
 
     WiFi.mode(WIFI_AP);
     WiFi.disconnect();
@@ -176,6 +178,8 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
     while (!doRestart)
     {
         dnsServer->processNextRequest();
+        if (millis() > rebootTimestamp + timeBeforeReboot)
+            doRestart = true;
         delay(1);
     }
 
@@ -192,6 +196,7 @@ void WiFiSetup::runWiFiConfigurationServer(String apName)
 
 void WiFiSetup::handleRoot(AsyncWebServerRequest *request)
 {
+    WiFiSetup::rebootTimestamp = millis(); // Resetting timestamp so that it won't restart
     logDebug("WebServer: Root called");
     request->send_P(200, "text/html", pageWiFiSetupServerRoot);
 }
