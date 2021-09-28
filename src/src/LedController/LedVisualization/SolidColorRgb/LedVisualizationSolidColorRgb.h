@@ -6,7 +6,9 @@
 
 class LedVisualizationSolidColorRgb : LedVisualizationSolidColor
 {
-    enum LedVisualizationType getVisualizationType();
+    public:
+        LedVisualizationSolidColorRgb(int ledsSize, uint8_t red, uint8_t green, uint8_t blue) : LedVisualizationSolidColor(ledsSize, red, green, blue) {};
+        enum LedVisualizationType getVisualizationType();
 };
 
 #endif

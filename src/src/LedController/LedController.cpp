@@ -31,7 +31,10 @@ void LedController::handle()
         if (nextCheck <= now)
         {
             uint delay = currentVisualization->handle(currentLedValues);
-            setPixels(false);
+
+            bool onlyRgb = this->currentVisualization->getVisualizationType() == SolidColorRgb;
+
+            setPixels(onlyRgb);
             nextCheck = delay == 0 ? 0 : millis() + delay;
         }
     }
@@ -76,14 +79,17 @@ float LedController::getBrightness()
     return ((255 - this->brightnessInverted) / (float)255);
 }
 
-void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b)
+void LedController::setSolidColor(uint8_t r, uint8_t g, uint8_t b, bool onlyRgb)
 {
     turnedOn = true;
     logDebug("Setting solid color r: '" + String(r) + "' g: '" + String(g) + "' b: '" + String(b) + "'...");
 
     if (currentVisualization)
         delete currentVisualization;
-    currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, r, g, b);
+    if (!onlyRgb)
+        currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColor(numLeds, r, g, b);
+    else
+        currentVisualization = (LedVisualizationBase *)new LedVisualizationSolidColorRgb(numLeds, r, g, b);
     nextCheck = 0;
     handle();
 }

@@ -96,6 +96,11 @@ void HaloghtServer::handleSetSolidColor(AsyncWebServerRequest *request)
 {
     logDebug("SetSolidColor called!");
 
+    bool onlyRgb = false;
+
+    if (request->hasArg("onlyRgb") && request->arg("onlyRgb").equalsIgnoreCase("true"))
+        onlyRgb = true;
+
     if (request->hasArg("color") && request->arg("color").length() == 7)
     {
         uint8_t red;
@@ -104,7 +109,7 @@ void HaloghtServer::handleSetSolidColor(AsyncWebServerRequest *request)
 
         HelperFunctions::extractColorFromString(request->arg("color"), &red, &green, &blue);
 
-        ledController->setSolidColor(red, green, blue);
+        ledController->setSolidColor(red, green, blue, onlyRgb);
         request->send(200, "text/plain", "OK");
     }
     else

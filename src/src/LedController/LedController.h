@@ -6,6 +6,7 @@
 
 #include "LedVisualization/LedVisualizationBase.h"
 #include "LedVisualization/SolidColor/LedVisualizationSolidColor.h"
+#include "LedVisualization/SolidColorRgb/LedVisualizationSolidColorRgb.h"
 #include "LedVisualization/TwoColorBlendingAnimated/LedVisualizationTwoColorBlendingAnimated.h"
 #include "LedVisualization/Stroboscope/LedVisualizationStroboscope.h"
 #include "../Other/HelperFunctions.h"
@@ -18,7 +19,7 @@ public:
     void handle();
 
     void setDefault();
-    void setSolidColor(uint8_t r, uint8_t g, uint8_t b);
+    void setSolidColor(uint8_t r, uint8_t g, uint8_t b, bool onlyRgb = false);
     void setTwoColorBlendingAnimated(int cycleDuration, bool randomStartOrder, bool useLinearEase, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2);
     void setStroboscope(int speed, uint8_t r, uint8_t g, uint8_t b);
     void setOnOff(bool on);
