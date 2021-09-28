@@ -212,6 +212,19 @@ String HaloghtServer::runtimeInfo()
     return String("Uptime: ") + String(days) + String(" days, ") + hourString + String(":") + minutesString + String(":") + secondsString;
 }
 
+int HaloghtServer::getStrength(){
+    int rssi = 0;
+    int averageRSSI = 0;
+    
+    for (int i = 0; i < 3; i++){
+        rssi += WiFi.RSSI();
+        delay(10);
+    }
+
+   averageRSSI = rssi / 3;
+    return averageRSSI;
+}
+
 void HaloghtServer::handleDebugInfo(AsyncWebServerRequest *request)
 {
     // Time info
@@ -219,14 +232,18 @@ void HaloghtServer::handleDebugInfo(AsyncWebServerRequest *request)
 
     // LEDs info
     Preferences preferencesLedSetup;
-    Preferences preferencesWiFiSetup;
 
     preferencesLedSetup.begin(PREFERENCES_LEDSETUP, true);
     int numberLeds = preferencesLedSetup.getInt(SETTING_LED_AMOUNT, 0);
     int ledPin = preferencesLedSetup.getInt(SETTING_DATA_PIN, 0);
+    preferencesLedSetup.end();
+
+    int wifiStrength = this->getStrength();
+
 
     debugInfo = debugInfo + "Number LEDs: " + String(numberLeds) + String("\n");
     debugInfo = debugInfo + "Data pin: " + String(ledPin) + String("\n");
+    debugInfo = debugInfo + "WiFi strength: " + String(wifiStrength) + String(" (RSSI)\n");
     
     request->send(200, "text/plain", debugInfo);
 }

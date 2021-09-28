@@ -43,6 +43,7 @@ private:
     String runtimeInfo();
 
     void logDebug(String message);
+    int getStrength();
 
 public:
     HaloghtServer(LedController *ledController);
