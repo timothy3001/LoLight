@@ -27,7 +27,7 @@ private:
   static String hostnameSuffix;
   static bool doRestart;
   static unsigned long rebootTimestamp;
-  static const int timeBeforeReboot = 15 * 60 * 1000; // 15 minutes
+  static const int timeBeforeReboot = 10 * 60 * 1000; // 10 minutes
 
   static void logDebug(String message);
   static void runWiFiConfigurationServer(String apName);
