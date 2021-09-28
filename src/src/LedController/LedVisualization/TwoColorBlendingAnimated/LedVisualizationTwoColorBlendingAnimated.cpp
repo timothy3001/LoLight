@@ -1,6 +1,6 @@
-#include "TwoColorBlendingAnimated.h"
+#include "LedVisualizationTwoColorBlendingAnimated.h"
 
-TwoColorBlendingAnimated::TwoColorBlendingAnimated(int ledsSize, int cycleDurationMs, bool randomStartOrder, bool useLinearEase, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2)
+LedVisualizationTwoColorBlendingAnimated::LedVisualizationTwoColorBlendingAnimated(int ledsSize, int cycleDurationMs, bool randomStartOrder, bool useLinearEase, uint8_t r1, uint8_t g1, uint8_t b1, uint8_t r2, uint8_t g2, uint8_t b2)
 {
     this->ledsSize = ledsSize;
     this->cycleDurationMs = cycleDurationMs;
@@ -25,7 +25,7 @@ TwoColorBlendingAnimated::TwoColorBlendingAnimated(int ledsSize, int cycleDurati
     }
 }
 
-void TwoColorBlendingAnimated::createRandomStartOrder()
+void LedVisualizationTwoColorBlendingAnimated::createRandomStartOrder()
 {
     for (int i = 0; i < ledsSize; i++)
     {
@@ -33,7 +33,7 @@ void TwoColorBlendingAnimated::createRandomStartOrder()
     }
 }
 
-void TwoColorBlendingAnimated::createSmoothStartOrder()
+void LedVisualizationTwoColorBlendingAnimated::createSmoothStartOrder()
 {
     int cycleLength = 20;
 
@@ -50,12 +50,12 @@ void TwoColorBlendingAnimated::createSmoothStartOrder()
     }
 }
 
-TwoColorBlendingAnimated::~TwoColorBlendingAnimated()
+LedVisualizationTwoColorBlendingAnimated::~LedVisualizationTwoColorBlendingAnimated()
 {
     delete[] this->progressShifts;
 }
 
-uint TwoColorBlendingAnimated::handle(LedValue leds[])
+uint LedVisualizationTwoColorBlendingAnimated::handle(LedValue leds[])
 {
     float progressStep = (millis() % this->cycleDurationMs) / (float)cycleDurationMs;
 
@@ -73,7 +73,13 @@ uint TwoColorBlendingAnimated::handle(LedValue leds[])
     return 20;
 }
 
-void TwoColorBlendingAnimated::logDebug(String message)
+enum LedVisualizationType LedVisualizationTwoColorBlendingAnimated::getVisualizationType()
+{
+    return TwoColorBlendingAnimated;
+}
+
+
+void LedVisualizationTwoColorBlendingAnimated::logDebug(String message)
 {
 #ifdef DEBUG
     Serial.print("LedController: ");

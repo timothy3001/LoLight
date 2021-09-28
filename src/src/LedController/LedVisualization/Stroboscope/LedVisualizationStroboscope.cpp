@@ -44,3 +44,8 @@ uint LedVisualizationStroboscope::handle(LedValue leds[])
     currentState = !currentState;
     return speed;
 }
+
+enum LedVisualizationType LedVisualizationStroboscope::getVisualizationType()
+{
+    return Stroboscope;
+}

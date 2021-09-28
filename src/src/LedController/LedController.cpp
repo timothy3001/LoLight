@@ -31,7 +31,7 @@ void LedController::handle()
         if (nextCheck <= now)
         {
             uint delay = currentVisualization->handle(currentLedValues);
-            setPixels();
+            setPixels(false);
             nextCheck = delay == 0 ? 0 : millis() + delay;
         }
     }
@@ -94,7 +94,7 @@ void LedController::setTwoColorBlendingAnimated(int cycleDuration, bool randomSt
     logDebug("Setting two color blending r1: '" + String(r1) + "' g1: '" + String(g1) + "' b1: '" + String(b1) + "' r2: '" + String(r2) + "' g2: '" + String(g2) + "' b2: '" + String(b2) + "'...");
     if (currentVisualization)
         delete currentVisualization;
-    currentVisualization = (LedVisualizationBase *)new TwoColorBlendingAnimated(numLeds, cycleDuration, randomStartOrder, useLinearEase, r1, g1, b1, r2, g2, b2);
+    currentVisualization = (LedVisualizationBase *)new LedVisualizationTwoColorBlendingAnimated(numLeds, cycleDuration, randomStartOrder, useLinearEase, r1, g1, b1, r2, g2, b2);
     nextCheck = 0;
     handle();
 }
@@ -110,7 +110,7 @@ void LedController::setStroboscope(int speed, uint8_t r, uint8_t g, uint8_t b)
     handle();
 }
 
-void LedController::setPixels()
+void LedController::setPixels(bool onlyRgb)
 {
     for (int i = 0; i < numLeds; i++)
     {
@@ -118,29 +118,13 @@ void LedController::setPixels()
         uint8_t r = currentLedValues[i].red;
         uint8_t g = currentLedValues[i].green;
         uint8_t b = currentLedValues[i].blue;
-        calculateRgbToRgbw(&r, &g, &b, &w);
+
+        if(!onlyRgb)
+            calculateRgbToRgbw(&r, &g, &b, &w);
 
         RgbwColor color(r, g, b, w);
         strip->SetPixelColor(i, color);
     }
-    strip->Show();
-}
-
-// Currently only used for debugging purposes.
-void LedController::setPixelsFullSpectrum()
-{
-    for (int i = 0; i < numLeds; i++)
-    {
-        uint8_t w = 0;
-        uint8_t r = currentLedValues[i].red;
-        uint8_t g = currentLedValues[i].green;
-        uint8_t b = currentLedValues[i].blue;
-        calculateRgbToRgbw(&r, &g, &b, &w);
-
-        RgbwColor color(r, g, b, w);
-        strip->SetPixelColor(i, color);
-    }
-
     strip->Show();
 }
 

@@ -6,7 +6,7 @@
 
 #include "LedVisualization/LedVisualizationBase.h"
 #include "LedVisualization/SolidColor/LedVisualizationSolidColor.h"
-#include "LedVisualization/TwoColorBlendingAnimated/TwoColorBlendingAnimated.h"
+#include "LedVisualization/TwoColorBlendingAnimated/LedVisualizationTwoColorBlendingAnimated.h"
 #include "LedVisualization/Stroboscope/LedVisualizationStroboscope.h"
 #include "../Other/HelperFunctions.h"
 
@@ -51,7 +51,7 @@ private:
 
     void logDebug(String message);
     void calculateRgbToRgbw(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *w);
-    void setPixels();
+    void setPixels(bool onlyRgb = true);
     void setPixelsFullSpectrum();
 };
 

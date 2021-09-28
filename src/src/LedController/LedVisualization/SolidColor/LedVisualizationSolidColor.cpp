@@ -25,3 +25,8 @@ uint LedVisualizationSolidColor::handle(LedValue leds[])
     }
     return 5000;
 }
+
+enum LedVisualizationType LedVisualizationSolidColor::getVisualizationType()
+{
+    return SolidColor;
+}

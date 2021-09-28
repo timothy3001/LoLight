@@ -21,6 +21,7 @@ public:
     uint handle(LedValue leds[]);
     LedVisualizationStroboscope(int ledsSize, int speed, uint8_t red, uint8_t green, uint8_t blue);
     ~LedVisualizationStroboscope();
+    enum LedVisualizationType getVisualizationType();
 };
 
 #endif

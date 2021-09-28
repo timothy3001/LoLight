@@ -3,6 +3,13 @@
 
 #include <Arduino.h>
 
+enum LedVisualizationType {
+    SolidColor,
+    SolidColorRgb,
+    Stroboscope,
+    TwoColorBlendingAnimated
+};
+
 struct LedValue
 {
     uint8_t red;
@@ -19,6 +26,7 @@ public:
     // Updates the LED array and returns a wait time, when it should be called next.
     // ATTENTION: Don't forget to yield() sometimes so that WiFi and so on won't crash!
     virtual uint handle(LedValue leds[]);
+    virtual enum LedVisualizationType getVisualizationType();
 };
 
 #endif
