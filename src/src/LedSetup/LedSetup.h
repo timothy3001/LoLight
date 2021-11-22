@@ -20,6 +20,7 @@ public:
   static void loadConfiguration();
   static int getNumLeds();
   static int getDataPin();
+  static int getLedType();
   static String &getDefaultColor();
   static bool isConfigurationValid();
 
@@ -28,10 +29,11 @@ private:
 
   static void handleRoot(AsyncWebServerRequest *request);
   static void handlePostConfiguration(AsyncWebServerRequest *request);
-  static bool validateAndReadSettings(AsyncWebServerRequest *request, int *dataPin, int *numLeds);
+  static bool validateAndReadSettings(AsyncWebServerRequest *request, int *dataPin, int *numLeds, int *ledType);
 
   static int numLeds;
   static int dataPin;
+  static int ledType;
   static bool configurationValid;
   static bool doRestart;
   static String defaultColor;

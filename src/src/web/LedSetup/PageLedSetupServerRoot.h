@@ -18,13 +18,13 @@ const char pageLedSetupServerRoot[] PROGMEM = R"=====(
       <hr />
     </div>
     <div class="row">
-      <div class="col-sm-6">
+      <div class="col-sm-8">
         <form class="form-horizontal" action="/config" method="post">
           <div class="form-group">
-            <label class="control-label col-sm-3" for="dataPin"
+            <label class="control-label col-sm-5" for="dataPin"
               >LED data pin</label
             >
-            <div class="col-sm-9">
+            <div class="col-sm-7">
               <input
                 type="number"
                 class="form-control"
@@ -37,10 +37,10 @@ const char pageLedSetupServerRoot[] PROGMEM = R"=====(
             </div>
           </div>
           <div class="form-group">
-            <label class="control-label col-sm-3" for="numLeds"
+            <label class="control-label col-sm-5" for="numLeds"
               >Number of LEDs</label
             >
-            <div class="col-sm-9">
+            <div class="col-sm-7">
               <input
                 type="number"
                 class="form-control"
@@ -53,6 +53,21 @@ const char pageLedSetupServerRoot[] PROGMEM = R"=====(
             </div>
           </div>
           <div class="form-group">
+            <label class="control-label col-sm-5" for="ledType"
+              >LED Type</label
+            >
+            <div class="col-sm-7">
+              <select
+                class="form-control"
+                id="ledType"
+                name="ledType"
+              >
+                <option value="0">SK6812 RGBW</option>
+                <option value="1">WS2815</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
             <div class="col-sm-offset-3 col-sm-9">
               <button type="submit" class="btn btn-default">Submit</button>
             </div>
@@ -62,6 +77,5 @@ const char pageLedSetupServerRoot[] PROGMEM = R"=====(
     </div>
   </div>
 </body>
-
 
 )=====";

@@ -3,6 +3,7 @@
 AsyncWebServer *LedSetup::webServer = NULL;
 int LedSetup::numLeds = -1;
 int LedSetup::dataPin = -1;
+int LedSetup::ledType = -1;
 bool LedSetup::doRestart = false;
 bool LedSetup::configurationValid = false;
 String LedSetup::defaultColor = "";
@@ -16,6 +17,7 @@ void LedSetup::loadConfiguration()
 
     numLeds = preferences.getInt(SETTING_LED_AMOUNT, -1);
     dataPin = preferences.getInt(SETTING_DATA_PIN, -1);
+    ledType = preferences.getInt(SETTING_LED_TYPE, -1);
     defaultColor = preferences.getString(SETTING_DEFAULT_COLOR, "");
 
     if (defaultColor.length() == 0)
@@ -68,6 +70,11 @@ int LedSetup::getDataPin()
     return dataPin;
 }
 
+int LedSetup::getLedType()
+{
+    return ledType;
+}
+
 String &LedSetup::getDefaultColor()
 {
     return defaultColor;
@@ -88,7 +95,7 @@ void LedSetup::handlePostConfiguration(AsyncWebServerRequest *request)
 {
     logDebug("WebServer: Post configuration called!");
 
-    if (!validateAndReadSettings(request, &dataPin, &numLeds))
+    if (!validateAndReadSettings(request, &dataPin, &numLeds, &ledType))
     {
         logDebug("Invalid parameters!");
         request->send(400, "text/html", pageLedSetupServerInvalidSettings);
@@ -101,6 +108,7 @@ void LedSetup::handlePostConfiguration(AsyncWebServerRequest *request)
 
         preferences.putInt(SETTING_LED_AMOUNT, numLeds);
         preferences.putInt(SETTING_DATA_PIN, dataPin);
+        preferences.putInt(SETTING_LED_TYPE, ledType);
 
         preferences.end();
 
@@ -109,16 +117,18 @@ void LedSetup::handlePostConfiguration(AsyncWebServerRequest *request)
     }
 }
 
-bool LedSetup::validateAndReadSettings(AsyncWebServerRequest *request, int *postDataPin, int *postNumLeds)
+bool LedSetup::validateAndReadSettings(AsyncWebServerRequest *request, int *postDataPin, int *postNumLeds, int *postLedType)
 {
     String dataPinString = request->hasArg("dataPin") ? request->arg("dataPin") : String("");
     String numLedsString = request->hasArg("numLeds") ? request->arg("numLeds") : String("");
+    String ledTypeString = request->hasArg("ledType") ? request->arg("ledType") : String("");
 
-    if (dataPinString.length() != 0 && numLedsString.length() != 0)
+    if (dataPinString.length() != 0 && numLedsString.length() != 0 && ledTypeString.length())
     {
         // Problem to solve: if toInt() fails, 0 is returned. But 0 is also a valid value for a pin. Thus we cannot check for error here in backend.
         *postDataPin = dataPinString.toInt();
         *postNumLeds = numLedsString.toInt();
+        *postLedType = ledTypeString.toInt();
 
         if (*postNumLeds != 0)
         {

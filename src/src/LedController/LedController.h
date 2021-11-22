@@ -10,11 +10,12 @@
 #include "LedVisualization/TwoColorBlendingAnimated/LedVisualizationTwoColorBlendingAnimated.h"
 #include "LedVisualization/Stroboscope/LedVisualizationStroboscope.h"
 #include "../Other/HelperFunctions.h"
+#include "../Constants.h"
 
 class LedController
 {
 public:
-    LedController(int dataPin, int numLeds, String defaultColor);
+    LedController(int dataPin, int numLeds, int ledType, String defaultColor);
     ~LedController();
     void handle();
 
@@ -33,6 +34,7 @@ private:
 
     int numLeds;
     int dataPin;
+    int ledType;
     String defaultColor = "";
     int brightnessInverted = 0;
     bool turnedOn = false;
@@ -48,7 +50,8 @@ private:
     // The arrays might become quite large, for 150 pixels it is 150 (Pixels) * 3 (RGB) * 2 (currentedValues and strip). That is 900 bytes of memory. But
     // since the ESP32 has 520kb of RAM, we should be fine here.
     LedValue *currentLedValues;
-    NeoPixelBus<NeoGrbwFeature, Neo800KbpsMethod> *strip;
+
+    void *strip;
 
     void logDebug(String message);
     void calculateRgbToRgbw(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *w);

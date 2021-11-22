@@ -37,7 +37,7 @@ void setup()
         // Turn LEDs on to desired state (only if configuration is valid and the ESP wasn't reset by software.
         // Currently a workaround to prevent turning on after a ESP reset due to WiFi)
         Serial.println("Valid config found, turning LEDs on to desired state...");
-        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds(), LedSetup::getDefaultColor());
+        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds(), LedSetup::getLedType(), LedSetup::getDefaultColor());
 
         ledController->setDefault();
         ledController->handle();
@@ -58,7 +58,7 @@ void setup()
 
     Serial.println("WiFi and LEDs setup successful! Starting regular operation...");
     if (!ledController)
-        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds(), LedSetup::getDefaultColor());
+        ledController = new LedController(LedSetup::getDataPin(), LedSetup::getNumLeds(), LedSetup::getLedType(), LedSetup::getDefaultColor());
 
     haloghtServer = new HaloghtServer(ledController);
 }

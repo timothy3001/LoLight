@@ -1,15 +1,24 @@
 #include "LedController.h"
 
-LedController::LedController(int dataPin, int numLeds, String defaultColor)
+LedController::LedController(int dataPin, int numLeds, int ledType, String defaultColor)
 {
     this->dataPin = dataPin;
     this->numLeds = numLeds;
+    this->ledType = ledType;
     this->currentLedValues = new LedValue[numLeds];
 
     HelperFunctions::extractColorFromString(defaultColor, &defaultRed, &defaultGreen, &defaultBlue);
 
-    this->strip = new NeoPixelBus<NeoGrbwFeature, Neo800KbpsMethod>(this->numLeds, this->dataPin);
-    strip->Begin();
+    if (ledType == LED_TYPE_SK6812)
+    {
+        this->strip = new NeoPixelBus<NeoGrbwFeature, Neo800KbpsMethod>(this->numLeds, this->dataPin);
+        ((NeoPixelBus<NeoGrbwFeature, Neo800KbpsMethod>*)this->strip)->Begin();
+    }
+    else if (ledType == LED_TYPE_WS2815)
+    {
+        this->strip = new NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>(this->numLeds, this->dataPin);
+        ((NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>*)this->strip)->Begin();
+    }
 
     // Disabled for workaround of wifi restarts
     // strip->Show();
@@ -17,8 +26,11 @@ LedController::LedController(int dataPin, int numLeds, String defaultColor)
 
 LedController::~LedController()
 {
-    delete this->strip;
+    if (this->strip)
+        delete this->strip;
+
     delete this->currentLedValues;
+    
     if (this->currentVisualization)
         delete this->currentVisualization;
 }
@@ -125,13 +137,29 @@ void LedController::setPixels(bool onlyRgb)
         uint8_t g = currentLedValues[i].green;
         uint8_t b = currentLedValues[i].blue;
 
-        if(!onlyRgb)
-            calculateRgbToRgbw(&r, &g, &b, &w);
+        if (ledType == LED_TYPE_SK6812)
+        {
+            if(!onlyRgb)
+                calculateRgbToRgbw(&r, &g, &b, &w);
 
-        RgbwColor color(r, g, b, w);
-        strip->SetPixelColor(i, color);
+            RgbwColor color(r, g, b, w);
+            ((NeoPixelBus<NeoGrbwFeature, Neo800KbpsMethod>*)this->strip)->SetPixelColor(i, color);
+        }
+        else if(ledType == LED_TYPE_WS2815)
+        {
+            RgbColor color(r, g, b);
+            ((NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>*)this->strip)->SetPixelColor(i, color);
+        }
     }
-    strip->Show();
+
+    if (ledType == LED_TYPE_SK6812)
+    {
+        ((NeoPixelBus<NeoGrbwFeature, Neo800KbpsMethod>*)this->strip)->Show();
+    }
+    else if(ledType == LED_TYPE_WS2815)
+    {
+        ((NeoPixelBus<NeoGrbFeature, Neo800KbpsMethod>*)this->strip)->Show();
+    }
 }
 
 void LedController::calculateRgbToRgbw(uint8_t *r, uint8_t *g, uint8_t *b, uint8_t *w)
