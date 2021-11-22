@@ -74,7 +74,10 @@ void WiFiSetup::setup()
         WiFi.mode(WIFI_STA);
         WiFi.disconnect();
         WiFi.config(INADDR_NONE, INADDR_NONE, INADDR_NONE);
-        WiFi.begin(ssid, password);
+        if (strlen(password) > 0)
+            WiFi.begin(ssid, password);
+        else
+            WiFi.begin(ssid);
         WiFi.setHostname(hostname.c_str());
         WiFi.onEvent(WiFiEventHandler);
 
